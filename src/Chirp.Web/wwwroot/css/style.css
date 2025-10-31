@@ -77,6 +77,16 @@ div.page div.navigation a {
   font-weight: bold;
 }
 
+div.page div.navigation a, div.page div.navigation form button {
+  display: inline block;
+  padding: 2px 8px; 
+  margin-right: 10 px;
+}
+
+div.page div.navigation a:last-child, div.page div.navigation form button:last-child {
+  margin-right: 0;
+}
+
 div.page div.navigation form {
     display: contents;
 }
