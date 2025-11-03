@@ -4,10 +4,6 @@ using Chirp.Infrastructure.Repositories;
 using Chirp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
-// Detect environment as early as possible
-var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
-var isTesting = environment.Equals("Testing", StringComparison.OrdinalIgnoreCase);
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Resolve DB path from env or fallback to temp
@@ -16,33 +12,37 @@ var dbPath = string.IsNullOrWhiteSpace(overridePath)
     ? Path.Combine(Path.GetTempPath(), "chirp.db")
     : Path.GetFullPath(overridePath);
 
-// Ensure directory exists (only needed for file-based DBs)
+// Make sure directory exists
 Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
-// Register services
+// Services
 builder.Services.AddRazorPages();
 
-// Use SQLite for normal runs
+// EF Core with SQLite
 builder.Services.AddDbContext<ChirpDbContext>(options =>
 {
     options.UseSqlite($"Data Source={dbPath}");
 });
 
+// App services
 builder.Services.AddScoped<ICheepService, CheepService>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 
 var app = builder.Build();
 
-// ✅ Only migrate and seed if NOT in testing
-if (!isTesting)
+// ✅ Only migrate & seed outside of testing
+var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+Console.WriteLine($"Running with DOTNET_ENVIRONMENT={env}");
+if (!string.Equals(env, "Testing", StringComparison.OrdinalIgnoreCase))
 {
-    using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-    db.Database.Migrate();
-    DbInitializer.SeedDatabase(db);
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
+        db.Database.Migrate();
+        DbInitializer.SeedDatabase(db);
+    }
 }
 
-// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -55,5 +55,4 @@ app.UseRouting();
 app.MapRazorPages();
 app.Run();
 
-// Needed for WebApplicationFactory
 public partial class Program { }
