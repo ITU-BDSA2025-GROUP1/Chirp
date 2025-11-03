@@ -4,6 +4,10 @@ using Chirp.Infrastructure.Repositories;
 using Chirp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
+// Detect environment as early as possible
+var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production";
+var isTesting = environment.Equals("Testing", StringComparison.OrdinalIgnoreCase);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Resolve DB path from env or fallback to temp
@@ -29,8 +33,8 @@ builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 
 var app = builder.Build();
 
-// Only migrate and seed if NOT testing
-if (!app.Environment.IsEnvironment("Testing"))
+// ✅ Only migrate and seed if NOT in testing
+if (!isTesting)
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
@@ -51,5 +55,5 @@ app.UseRouting();
 app.MapRazorPages();
 app.Run();
 
-// Needed for WebApplicationFactory to access Program
+// Needed for WebApplicationFactory
 public partial class Program { }

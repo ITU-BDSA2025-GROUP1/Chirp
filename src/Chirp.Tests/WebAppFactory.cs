@@ -5,7 +5,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace Chirp.Tests;
 
@@ -15,7 +14,8 @@ public class WebAppFactory : WebApplicationFactory<Chirp.Web.Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Explicitly use "Testing" environment so Program.cs skips migrations
+        // Force test environment before Program.cs runs migrations
+        builder.UseSetting("DOTNET_ENVIRONMENT", "Testing");
         builder.UseEnvironment("Testing");
 
         builder.ConfigureLogging(logging =>
@@ -32,17 +32,16 @@ public class WebAppFactory : WebApplicationFactory<Chirp.Web.Program>
             if (descriptor != null)
                 services.Remove(descriptor);
 
-            // Create shared in-memory SQLite connection
+            // Use a shared in-memory SQLite connection
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
             services.AddDbContext<ChirpDbContext>(options =>
             {
                 options.UseSqlite(_connection);
-                options.EnableSensitiveDataLogging(false);
             });
 
-            // Initialize schema and seed test data
+            // Initialize schema and seed data
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
