@@ -12,37 +12,33 @@ var dbPath = string.IsNullOrWhiteSpace(overridePath)
     ? Path.Combine(Path.GetTempPath(), "chirp.db")
     : Path.GetFullPath(overridePath);
 
-// Make sure directory exists
+// Ensure directory exists (only needed for file-based DBs)
 Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
 
-// Services
+// Register services
 builder.Services.AddRazorPages();
 
-// EF Core with SQLite
+// Use SQLite for normal runs
 builder.Services.AddDbContext<ChirpDbContext>(options =>
 {
     options.UseSqlite($"Data Source={dbPath}");
 });
 
-// App services
 builder.Services.AddScoped<ICheepService, CheepService>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 
 var app = builder.Build();
 
-// Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
-using (var scope = app.Services.CreateScope())
+// Only migrate and seed if NOT testing
+if (!app.Environment.IsEnvironment("Testing"))
 {
+    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-
-    if (!app.Environment.IsEnvironment("Testing"))
-    {
-        db.Database.Migrate();
-        DbInitializer.SeedDatabase(db);
-    }
+    db.Database.Migrate();
+    DbInitializer.SeedDatabase(db);
 }
 
-// Pipeline
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -55,5 +51,5 @@ app.UseRouting();
 app.MapRazorPages();
 app.Run();
 
-// Make the implicit Program class public for testing
+// Needed for WebApplicationFactory to access Program
 public partial class Program { }
