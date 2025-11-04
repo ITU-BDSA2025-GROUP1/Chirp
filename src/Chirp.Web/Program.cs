@@ -30,14 +30,13 @@ builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 
 var app = builder.Build();
 
-// ✅ Only migrate & seed outside of testing
-var env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-Console.WriteLine($"Running with DOTNET_ENVIRONMENT={env}");
-if (!string.Equals(env, "Testing", StringComparison.OrdinalIgnoreCase))
+// Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
+if (!app.Environment.IsEnvironment("Testing"))
 {
     using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
+
         db.Database.Migrate();
         DbInitializer.SeedDatabase(db);
     }
