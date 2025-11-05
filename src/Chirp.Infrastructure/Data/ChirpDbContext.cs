@@ -1,10 +1,11 @@
 using Chirp.Core.Entities;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chirp.Infrastructure.Data;
 
-public class ChirpDbContext : IdentityDbContext
+public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 {
     public ChirpDbContext(DbContextOptions<ChirpDbContext> options) : base(options) { }
 
@@ -13,18 +14,12 @@ public class ChirpDbContext : IdentityDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // required so Identity config (keys etc.) is applied
+
         modelBuilder.Entity<Author>(b =>
         {
-            b.HasKey(a => a.AuthorId);
-            b.Property(a => a.Name).IsRequired().HasMaxLength(64);
-            b.Property(a => a.Email).IsRequired().HasMaxLength(256);
-            b.HasIndex(a => a.Name).IsUnique();
-            b.HasIndex(a => a.Email).IsUnique();
-
-            b.HasMany(a => a.Cheeps)
-             .WithOne(c => c.Author)
-             .HasForeignKey(c => c.AuthorId)
-             .OnDelete(DeleteBehavior.Cascade);
+            // no HasKey override for Identity primary key
+            b.HasMany(a => a.Cheeps).WithOne(c => c.Author).HasForeignKey(c => c.AuthorId);
         });
 
         modelBuilder.Entity<Cheep>(b =>

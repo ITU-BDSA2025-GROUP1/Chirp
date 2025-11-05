@@ -1,6 +1,9 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace Chirp.Core.Entities;
 
-public class Author
+
+public class Author : IdentityUser<int>
 {
     public int AuthorId { get; set; }
 
