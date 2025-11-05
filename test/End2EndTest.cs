@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Chirp.Tests;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
@@ -10,46 +11,18 @@ using Xunit.Abstractions;
 
 namespace Chirp.E2E;
 
-// Shared fixture
-public class TestFixture : IDisposable
-{
-    private readonly WebApplicationFactory<Program>? _factory;
-    public HttpClient Client { get; }
 
-    public TestFixture()
-    {
-        var external = Environment.GetEnvironmentVariable("TEST_BASEURL");
-        if (!string.IsNullOrWhiteSpace(external))
-        {
-            Client = new HttpClient { BaseAddress = new Uri(external) };
-        }
-        else
-        {
-            // Use in-process hosting
-            _factory = new WebApplicationFactory<Program>();
-            Client = _factory.CreateClient();
-        }
-    }
 
-    public void Dispose()
-    {
-        Client.Dispose();
-        _factory?.Dispose();
-    }
-}
 
-[CollectionDefinition("E2E")]
-public class E2ECollection : ICollectionFixture<TestFixture> { }
-
-[Collection("E2E")]
+[Collection("SharedFactory")]
 public class End2EndTests
 {
     private readonly HttpClient _client;
     private readonly ITestOutputHelper _output;
 
-    public End2EndTests(TestFixture fx, ITestOutputHelper output)
+    public End2EndTests(WebAppFactory factory, ITestOutputHelper output)
     {
-        _client = fx.Client;
+        _client = factory.CreateClient();
         _output = output;
     }
 

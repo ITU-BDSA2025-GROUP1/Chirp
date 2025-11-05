@@ -41,6 +41,8 @@ jobs:
 
     - name: Test
       run: dotnet test test/test.csproj --configuration Release --no-build --verbosity normal
+      env:
+        DOTNET_ENVIRONMENT: Testing
 
     - name: Publish single-file executable
       run: dotnet publish src/Chirp.Web/Chirp.Web.csproj -c Release -r ${{ matrix.rid }} -p:PublishSingleFile=true --no-self-contained -o publish/${{ matrix.rid }}

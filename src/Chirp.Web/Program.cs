@@ -31,15 +31,17 @@ builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 var app = builder.Build();
 
 // Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
-using (var scope = app.Services.CreateScope())
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
 
-    DbInitializer.SeedDatabase(db);
+        db.Database.Migrate();
+        DbInitializer.SeedDatabase(db);
+    }
 }
 
-// Pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -52,5 +54,4 @@ app.UseRouting();
 app.MapRazorPages();
 app.Run();
 
-// Make the implicit Program class public for testing
 public partial class Program { }

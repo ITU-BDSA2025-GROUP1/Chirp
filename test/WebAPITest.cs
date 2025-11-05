@@ -13,6 +13,8 @@ namespace Chirp.WebApi;
 // The API-specific tests are now obsolete and have been removed.
 // Web application tests should use End2EndTests.cs with WebApplicationFactory.
 
+//Comment to be deleted
+
 public class WebApiTests
 {
     [Fact]
