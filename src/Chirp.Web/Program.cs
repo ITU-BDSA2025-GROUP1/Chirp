@@ -1,28 +1,27 @@
 using Chirp.Infrastructure.Data;
+using Chirp.Core.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Chirp.Core.Interfaces;
 using Chirp.Infrastructure.Repositories;
 using Chirp.Infrastructure.Services;
-using Chirp.Core.Entities;
-using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ChirpDbContextConnection' not found.");;
 
-// --- single, explicit DB registration with migrations assembly set to Chirp.Infrastructure ---
+// Single DbContext registration (point to the same DB and migrations assembly)
 var dbPath = Path.Combine(builder.Environment.ContentRootPath, "chirp.db");
-Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+builder.Services.AddDbContext<ChirpDbContext>(o =>
+    o.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("Chirp.Infrastructure")));
 
-builder.Services.AddDbContext<ChirpDbContext>(options =>
-{
-    options.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("Chirp.Infrastructure"));
-});
+builder.Services.AddDefaultIdentity<Author>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<ChirpDbContext>();
 
-// register Identity with int keys
-builder.Services.AddIdentity<Author, IdentityRole<int>>(options =>
+// Identity with int keys
+builder.Services.AddIdentity<Author, IdentityRole<int>>(o =>
 {
-    options.SignIn.RequireConfirmedAccount = false;
-    options.User.RequireUniqueEmail = true;
+    o.SignIn.RequireConfirmedAccount = false;
+    o.User.RequireUniqueEmail = true;
 })
 .AddEntityFrameworkStores<ChirpDbContext>()
 .AddDefaultTokenProviders();
@@ -43,11 +42,15 @@ builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 
 var app = builder.Build();
 
-// apply migrations on the same DB file/DbContext
+// Ensure DB is created/migrated and seeded
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-    db.Database.Migrate();
+    db.Database.Migrate(); // or EnsureCreated() if you don't use migrations
+    if (!db.Cheeps.Any())
+    {
+        DbInitializer.SeedDatabase(db);
+    }
 }
 
 // Pipeline
