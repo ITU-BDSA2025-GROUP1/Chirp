@@ -62,7 +62,7 @@ div.page h1 img {
   height: 1em;
 }
 
-div.page div.navigation {
+.navigation {
   background: #DEE9E8;
   padding: 4px 10px;
   border-top: 1px solid #ccc;
@@ -72,26 +72,31 @@ div.page div.navigation {
   letter-spacing: 0.5px;
 }
 
-div.page div.navigation a {
-  color: #444;
-  font-weight: bold;
+.navigation .navigation-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
-div.page div.navigation form {
+.navigation a, .navigation form button {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #571010;
+  color: #ffffff;
+  border: 1px solid #3b0707;
+  border-radius: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.navigation a:hover, .navigation form button:hover {
+  background: #6b1616;
+}
+
+.navigation form {
     display: contents;
-}
-
-div.page div.navigation form button {
-    padding: unset;
-    background: unset;
-    color: #444;
-    font-weight: bold;
-    display: inline-block;
-    font-size: unset;
-    cursor: pointer;
-    text-decoration: underline;
-    font-family: unset;
-    letter-spacing: unset;
 }
 
 div.page h2 {
