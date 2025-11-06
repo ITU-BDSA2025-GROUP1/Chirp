@@ -6,9 +6,20 @@ using Chirp.Infrastructure.Data;
 namespace Chirp.Infrastructure.Data;
 public static class DbInitializer
 {
+
     public static void SeedDatabase(ChirpDbContext db)
     {
         db.Database.Migrate();
+        SeedData(db);
+    }
+
+    public static void SeedTestDataBase(ChirpDbContext db)
+    {
+        SeedData(db);
+    }
+
+    private static void SeedData(ChirpDbContext db)
+    {
 
         if (!(db.Authors.Any() && db.Cheeps.Any()))
         {

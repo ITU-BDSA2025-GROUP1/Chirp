@@ -43,4 +43,10 @@ public class CheepRepository : ICheepRepository
             .Take(pageSize)
             .ToList();
     }
+
+    public Boolean CreateCheep(Cheep cheep)
+    {
+        _db.Cheeps.Add(cheep);
+        return _db.SaveChanges() > 0;
+    }
 }

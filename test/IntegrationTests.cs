@@ -1,4 +1,3 @@
-using Chirp.LocalServer;
 using System.Net;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
