@@ -80,15 +80,19 @@ public class RegisterModel : PageModel
 
         var user = new Author
         {
-            UserName = Input.Name,
+            UserName = Input.Email,
             Email = Input.Email,
+            Name = Input.Name
         };
 
+        _logger.LogWarning("Input.Email:'{Email}' Input.Name:'{Name}'", Input.Email, Input.Name);
+        _logger.LogWarning("user.Email:'{Email}' user.UserName:'{UserName}'", user.Email, user.UserName);
         var result = await _userManager.CreateAsync(user, Input.Password);
         if (!result.Succeeded)
         {
             foreach (var err in result.Errors)
             {
+                _logger.LogWarning(user.Email);
                 ModelState.AddModelError(string.Empty, err.Description);
                 _logger.LogWarning("Register error: {Code} {Desc}", err.Code, err.Description);
             }

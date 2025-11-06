@@ -41,6 +41,9 @@ builder.Services.ConfigureApplicationCookie(opts =>
     opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None; // dev only
     opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
     opts.Cookie.HttpOnly = true;
+    opts.LoginPath = "/Account/Login";
+    opts.LogoutPath = "/Account/Logout";
+    opts.AccessDeniedPath = "/Account/AccessDenied";
 });
 
 // Services
