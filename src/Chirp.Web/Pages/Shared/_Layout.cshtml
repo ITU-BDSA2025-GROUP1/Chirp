@@ -12,7 +12,7 @@
     <div class = "navigation">
         @if (User.Identity.IsAuthenticated)
         { 
-            <div class ="navigation-links">
+            <div class = "navigation-links">
                 <a href = "/@(User.Identity.Name)"> My timeline </a> 
                 <a href = "/" > Public timeline </a>
                 <!-- Add a logout -->
@@ -23,14 +23,23 @@
         }       
         else 
         {
-            <div class ="navigation-links">
+            <div class = "navigation-links">
                 <a href = "/" > Public timeline </a>
                 <!-- Add a register -->
-                <a href = "/Identiry/Account/Register"> Register </a>
+                <a href = "/Account/Register"> Register </a>
                 <!-- Add a login -->
-                <a href = "/Identity/Account/Login"> Login </a>
+                <a href = "/Account/Login"> Login </a>
             </div>
         }
+    </div>
+
+    <!-- Send cheeps: only available when logged in -->
+    <div class = "cheepbox">
+        <h3> What's on your mind @User.Identity.Name)? </h3>
+        <form method = "post">
+            <input style = "float: left", type = "text" asp-for = "Text" >
+            <input type = "submit" value= "Share" >
+        </form>
     </div>
 
     <div class=body>
