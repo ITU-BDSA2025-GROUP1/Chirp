@@ -28,16 +28,21 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: 9.x
 
+    - name: List current directory
+      run: pwd && ls -R
+    
     - name: Restore dependencies
-      run: dotnet restore Chirp!.sln
+      run: dotnet restore Chirp.sln
 
     - name: Build
-      run: dotnet build Chirp!.sln --configuration Release --no-restore
+      run: dotnet build Chirp.sln --configuration Release --no-restore
 
     - name: Test
       run: dotnet test test/test.csproj --configuration Release --no-build --verbosity normal
+      env:
+        DOTNET_ENVIRONMENT: Testing
 
     - name: Publish single-file executable
       run: dotnet publish src/Chirp.Web/Chirp.Web.csproj -c Release -r ${{ matrix.rid }} -p:PublishSingleFile=true --no-self-contained -o publish/${{ matrix.rid }}

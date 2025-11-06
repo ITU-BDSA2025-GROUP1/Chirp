@@ -56,6 +56,26 @@ builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, Chirp.Web.Services.NoOpEmailSender>();
 
 var app = builder.Build();
+
+// Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
+
+        db.Database.Migrate();
+        DbInitializer.SeedDatabase(db);
+    }
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -65,5 +85,4 @@ app.UseAuthorization();
 app.MapRazorPages();
 app.Run();
 
-// Make the implicit Program class public for testing
 public partial class Program { }
