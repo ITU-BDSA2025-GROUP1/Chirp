@@ -6,5 +6,5 @@ public class Cheep
     public string Text { get; set; } = null!;
     public DateTime Timestamp { get; set; } // store UTC
     public int AuthorId { get; set; }
-    public Author Author { get; set; } = null!;
+    public Author? Author { get; set; } = null!;
 }

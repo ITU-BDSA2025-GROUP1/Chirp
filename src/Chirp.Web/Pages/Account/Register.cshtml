@@ -1,0 +1,17 @@
+﻿@page
+@model Chirp.Web.Pages.Account.RegisterModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Register</h2>
+
+<form method="post">
+    <input asp-for="Input.Name" />
+    <input asp-for="Input.Email" />
+    <input asp-for="Input.Password" />
+    <input asp-for="Input.ConfirmPassword" />
+    <button type="submit">Register</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

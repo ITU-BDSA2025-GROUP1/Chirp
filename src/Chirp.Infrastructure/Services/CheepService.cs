@@ -1,4 +1,5 @@
 using Chirp.Core.DTOs;
+using Chirp.Core.Entities;
 using Chirp.Core.Interfaces;
 using System.Globalization;
 
@@ -31,6 +32,26 @@ public class CheepService : ICheepService
                 c.Text,
                 FormatTs(c.Timestamp)))
             .ToList();
+    }
+
+    public Boolean CreateCheep(Author author, string text, DateTime? timestamp = null)
+    {
+        if (text.Length > 160) return false;
+        
+        /*
+            Change Author author in signature to be string author and lookup the author in the author table
+            var authorEntity = _authorRepo.GetAuthorByName(author);
+            And change Author = authorEntity in the Cheep object below
+        */
+
+        var cheep = new Core.Entities.Cheep
+        {
+            Text = text,
+            Timestamp = timestamp ?? DateTime.UtcNow,
+            Author = author //Change to Author = authorEntity
+        };
+
+        return _repo.CreateCheep(cheep);
     }
 
     private static string FormatTs(DateTime dtUtc)
