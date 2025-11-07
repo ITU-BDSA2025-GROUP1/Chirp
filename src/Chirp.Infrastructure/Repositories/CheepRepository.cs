@@ -49,4 +49,29 @@ public class CheepRepository : ICheepRepository
         _db.Cheeps.Add(cheep);
         return _db.SaveChanges() > 0;
     }
+
+    public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
+    {
+        if (string.IsNullOrWhiteSpace(authorName) || string.IsNullOrWhiteSpace(text))
+            return false;
+
+        if (text.Length > 280)
+            return false;
+
+        var author = _db.Authors.SingleOrDefault(a => a.Name == authorName);
+        if (author == null)
+            return false;
+
+        var cheep = new Cheep
+        {
+            Text = text.Trim(),
+            Timestamp = timestamp ?? DateTime.UtcNow,
+            AuthorId = author.AuthorId
+        };
+
+        _db.Cheeps.Add(cheep);
+        return _db.SaveChanges() > 0;
+
+    }
+
 }
