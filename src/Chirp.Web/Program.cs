@@ -8,6 +8,8 @@ using Chirp.Infrastructure.Repositories;
 using Chirp.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Chirp.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection") 
@@ -35,53 +37,58 @@ builder.Services.Configure<IdentityOptions>(options =>
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
 });
-// configure cookie for dev if needed (do not add duplicate auth schemes)
+// configure Application and External cookies for OAuth state to work across sites
 builder.Services.ConfigureApplicationCookie(opts =>
 {
-    opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None; // dev only
-    opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
-    opts.Cookie.HttpOnly = true;
+    opts.Cookie.SameSite = SameSiteMode.None;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     opts.LoginPath = "/Account/Login";
     opts.LogoutPath = "/Account/Logout";
-    opts.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// Services
-builder.Services.AddRazorPages();
+// critical: external cookie (used to hold the OAuth state) must allow cross-site
+builder.Services.ConfigureExternalCookie(opts =>
+{
+    opts.Cookie.SameSite = SameSiteMode.None;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
-// App services
+builder.Services.AddRazorPages();
 builder.Services.AddScoped<ICheepService, CheepService>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
-// register your implementation explicitly to avoid ambiguity
 builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, Chirp.Web.Services.NoOpEmailSender>();
+
+// add session if you use app.UseSession()
+builder.Services.AddSession();
+
+// ------ Move this BEFORE builder.Build() ------
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = "GitHub";
+    })
+    .AddCookie()
+    .AddGitHub(o =>
+    {
+        o.ClientId = builder.Configuration["authentication:github:clientId"];
+        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"];
+        o.CallbackPath = "/signin-github";
+    });
+// --------------------------------------------
 
 var app = builder.Build();
 
-// Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
-if (!app.Environment.IsEnvironment("Testing"))
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-
-        db.Database.Migrate();
-        DbInitializer.SeedDatabase(db);
-    }
-}
-
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseSession();
 app.MapRazorPages();
 app.Run();
 
