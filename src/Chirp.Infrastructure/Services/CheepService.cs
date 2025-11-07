@@ -36,22 +36,28 @@ public class CheepService : ICheepService
 
     public Boolean CreateCheep(Author author, string text, DateTime? timestamp = null)
     {
-        if (text.Length > 160) return false;
-        
+        //if (text.Length > 160) return false;
+
         /*
             Change Author author in signature to be string author and lookup the author in the author table
             var authorEntity = _authorRepo.GetAuthorByName(author);
             And change Author = authorEntity in the Cheep object below
         */
 
-        var cheep = new Core.Entities.Cheep
-        {
-            Text = text,
-            Timestamp = timestamp ?? DateTime.UtcNow,
-            Author = author //Change to Author = authorEntity
-        };
+        //var cheep = new Core.Entities.Cheep
+        //{
+        //Text = text,
+        //Timestamp = timestamp ?? DateTime.UtcNow,
+        //Author = author //Change to Author = authorEntity
+        //};
 
-        return _repo.CreateCheep(cheep);
+        if (string.IsNullOrWhiteSpace(author.Name) || string.IsNullOrWhiteSpace(text))
+            return false;
+
+        if (text.Length > 280)
+            return false;
+
+        return _repo.CreateCheep(author.Name, text, timestamp);
     }
 
     private static string FormatTs(DateTime dtUtc)
