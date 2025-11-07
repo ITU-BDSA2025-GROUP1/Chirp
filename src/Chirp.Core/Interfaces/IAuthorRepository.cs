@@ -1,6 +1,6 @@
 using Chirp.Core.Entities;
 
-namespace IAuthorRepository;
+namespace Chirp.Core.Interfaces;
 
 public interface IAuthorRepository
 {
