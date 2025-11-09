@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Chirp.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection") 
@@ -64,20 +66,31 @@ builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSe
 // add session if you use app.UseSession()
 builder.Services.AddSession();
 
-// Add GitHub authentication - Identity already provides cookie authentication
-builder.Services.AddAuthentication()
-    .AddGitHub(o =>
+// Add GitHub authentication conditionally so tests/CI without secrets still run
+var githubClientId = builder.Configuration["authentication:github:clientId"];
+var githubClientSecret = builder.Configuration["authentication:github:clientSecret"];
+var githubAuthEnabled = !string.IsNullOrWhiteSpace(githubClientId) && !string.IsNullOrWhiteSpace(githubClientSecret);
+
+var authBuilder = builder.Services.AddAuthentication();
+if (githubAuthEnabled)
+{
+    authBuilder.AddGitHub(o =>
     {
-        o.ClientId = builder.Configuration["authentication:github:clientId"];
-        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"];
+        o.ClientId = githubClientId;
+        o.ClientSecret = githubClientSecret;
         o.CallbackPath = "/signin-github";
-        
-        // Request email scope from GitHub
         o.Scope.Add("user:email");
     });
-// --------------------------------------------
+}
 
 var app = builder.Build();
+
+// Log missing GitHub auth after container built (logger factory available)
+if (!githubAuthEnabled)
+{
+    var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    startupLogger.LogWarning("GitHub OAuth not configured. Set AUTHENTICATION__GITHUB__CLIENTID and AUTHENTICATION__GITHUB__CLIENTSECRET to enable external login.");
+}
 
 if (!app.Environment.IsDevelopment())
 {
