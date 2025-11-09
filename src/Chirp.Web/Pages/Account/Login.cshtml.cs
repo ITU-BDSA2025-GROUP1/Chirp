@@ -59,4 +59,16 @@ public class LoginModel : PageModel
         ModelState.AddModelError(string.Empty, "Invalid login attempt.");
         return Page();
     }
+
+    public IActionResult OnPostGitHub(string? returnUrl = null)
+    {
+        // Store the return URL for after authentication
+        var redirectUrl = returnUrl ?? Url.Content("~/");
+        
+        // Configure the redirect URL and which provider to use
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties("GitHub", Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl = redirectUrl }));
+        
+        // This triggers the challenge (redirect to GitHub)
+        return new ChallengeResult("GitHub", properties);
+    }
 }
