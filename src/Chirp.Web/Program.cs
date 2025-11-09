@@ -40,10 +40,13 @@ builder.Services.Configure<IdentityOptions>(options =>
 // configure Application and External cookies for OAuth state to work across sites
 builder.Services.ConfigureApplicationCookie(opts =>
 {
-    opts.Cookie.SameSite = SameSiteMode.None;
+    opts.Cookie.SameSite = SameSiteMode.Lax;
     opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    opts.Cookie.HttpOnly = true;
     opts.LoginPath = "/Account/Login";
     opts.LogoutPath = "/Account/Logout";
+    opts.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    opts.SlidingExpiration = true;
 });
 
 // critical: external cookie (used to hold the OAuth state) must allow cross-site
@@ -61,19 +64,16 @@ builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSe
 // add session if you use app.UseSession()
 builder.Services.AddSession();
 
-// ------ Move this BEFORE builder.Build() ------
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = "GitHub";
-    })
-    .AddCookie()
+// Add GitHub authentication - Identity already provides cookie authentication
+builder.Services.AddAuthentication()
     .AddGitHub(o =>
     {
         o.ClientId = builder.Configuration["authentication:github:clientId"];
         o.ClientSecret = builder.Configuration["authentication:github:clientSecret"];
         o.CallbackPath = "/signin-github";
+        
+        // Request email scope from GitHub
+        o.Scope.Add("user:email");
     });
 // --------------------------------------------
 
@@ -88,6 +88,16 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add middleware to prevent caching after authentication is set up
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
+
 app.UseSession();
 app.MapRazorPages();
 app.Run();
