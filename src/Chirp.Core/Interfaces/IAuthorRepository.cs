@@ -4,9 +4,9 @@ namespace Chirp.Core.Interfaces;
 
 public interface IAuthorRepository
 {
-    Author GetAuthorByName(string name);
+    Author? GetAuthorByName(string name);
 
-    Author GetAuthorByEmail(string email);
+    Author? GetAuthorByEmail(string email);
 
-    Author AddAuthor(Author author);
+    void AddAuthor(Author author);
 }
