@@ -8,6 +8,10 @@ using Chirp.Infrastructure.Repositories;
 using Chirp.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Chirp.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection") 
@@ -35,53 +39,79 @@ builder.Services.Configure<IdentityOptions>(options =>
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
 });
-// configure cookie for dev if needed (do not add duplicate auth schemes)
+// configure Application and External cookies for OAuth state to work across sites
 builder.Services.ConfigureApplicationCookie(opts =>
 {
-    opts.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.None; // dev only
-    opts.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax;
+    opts.Cookie.SameSite = SameSiteMode.Lax;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     opts.Cookie.HttpOnly = true;
     opts.LoginPath = "/Account/Login";
     opts.LogoutPath = "/Account/Logout";
-    opts.AccessDeniedPath = "/Account/AccessDenied";
+    opts.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    opts.SlidingExpiration = true;
 });
 
-// Services
-builder.Services.AddRazorPages();
+// critical: external cookie (used to hold the OAuth state) must allow cross-site
+builder.Services.ConfigureExternalCookie(opts =>
+{
+    opts.Cookie.SameSite = SameSiteMode.None;
+    opts.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
-// App services
+builder.Services.AddRazorPages();
 builder.Services.AddScoped<ICheepService, CheepService>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
-// register your implementation explicitly to avoid ambiguity
 builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, Chirp.Web.Services.NoOpEmailSender>();
+
+// add session if you use app.UseSession()
+builder.Services.AddSession();
+
+// Add GitHub authentication conditionally so tests/CI without secrets still run
+var githubClientId = builder.Configuration["authentication:github:clientId"];
+var githubClientSecret = builder.Configuration["authentication:github:clientSecret"];
+var githubAuthEnabled = !string.IsNullOrWhiteSpace(githubClientId) && !string.IsNullOrWhiteSpace(githubClientSecret);
+
+var authBuilder = builder.Services.AddAuthentication();
+if (githubAuthEnabled)
+{
+    authBuilder.AddGitHub(o =>
+    {
+        o.ClientId = githubClientId;
+        o.ClientSecret = githubClientSecret;
+        o.CallbackPath = "/signin-github";
+        o.Scope.Add("user:email");
+    });
+}
 
 var app = builder.Build();
 
-// Apply pending migrations automatically (or switch to EnsureCreated for a quick start)
-if (!app.Environment.IsEnvironment("Testing"))
+// Log missing GitHub auth after container built (logger factory available)
+if (!githubAuthEnabled)
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
-
-        db.Database.Migrate();
-        DbInitializer.SeedDatabase(db);
-    }
+    var startupLogger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+    startupLogger.LogWarning("GitHub OAuth not configured. Set AUTHENTICATION__GITHUB__CLIENTID and AUTHENTICATION__GITHUB__CLIENTSECRET to enable external login.");
 }
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Add middleware to prevent caching after authentication is set up
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "0";
+    await next();
+});
+
+app.UseSession();
 app.MapRazorPages();
 app.Run();
 

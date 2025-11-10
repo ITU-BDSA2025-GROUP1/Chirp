@@ -1,11 +1,10 @@
 @page
 @model Chirp.Web.Pages.Account.LogoutModel
-@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <h2>Log out</h2>
 
 <form method="post">
     <p>Are you sure you want to log out?</p>
     <button type="submit" class="btn btn-danger">Log out</button>
-    <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+    <a href="/" class="btn btn-secondary">Cancel</a>
 </form>
