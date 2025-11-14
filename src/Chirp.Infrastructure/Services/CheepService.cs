@@ -34,7 +34,7 @@ public class CheepService : ICheepService
             .ToList();
     }
 
-    public Boolean CreateCheep(Author author, string text, DateTime? timestamp = null)
+    public bool CreateCheep(Author author, string text, DateTime? timestamp = null)
     {
         //if (text.Length > 160) return false;
 
@@ -51,11 +51,10 @@ public class CheepService : ICheepService
         //Author = author //Change to Author = authorEntity
         //};
 
-        if (string.IsNullOrWhiteSpace(author.Name) || string.IsNullOrWhiteSpace(text))
-            return false;
+        if (string.IsNullOrWhiteSpace(author.Name)) return false;
+        if (string.IsNullOrWhiteSpace(text)) return false;
 
-        if (text.Length > 280)
-            return false;
+        if (text.Length > 280) return false;
 
         return _repo.CreateCheep(author.Name, text, timestamp);
     }

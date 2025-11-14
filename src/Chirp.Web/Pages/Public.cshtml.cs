@@ -19,9 +19,17 @@ public class PublicModel : PageModel
     public ActionResult OnGet([FromQuery] int page = 1)
     {
         if (page < 1) page = 1;
-        
+
         CurrentPage = page;
         Cheeps = _service.GetCheeps(page);
         return Page();
+    }
+    
+    public ActionResult OnPost([FromForm] string text)
+    {
+        if(!User.Identity.IsAuthenticated == true) return RedirectToPage("/Public");
+        if (!string.IsNullOrWhiteSpace(text))_service.CreateCheep(User.Identity.Name, text);
+        
+        return RedirectToPage("/Public");
     }
 }
