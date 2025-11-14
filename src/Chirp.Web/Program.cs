@@ -10,13 +10,31 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Chirp.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection") 
-    ?? throw new InvalidOperationException("Connection string 'ChirpDbContextConnection' not found.");
+
+// Read optional connection string (used if you switch to SQL Server in production).
+var connectionString = builder.Configuration.GetConnectionString("ChirpDbContextConnection");
+
+// Choose a writable location for SQLite in Production (App Service 'HOME' is writable when
+// the app is deployed as Run From Package). Fallback to ContentRoot/App_Data if HOME isn't set.
+string dataDirectory;
+if (builder.Environment.IsDevelopment())
+{
+    dataDirectory = builder.Environment.ContentRootPath;
+}
+else
+{
+    var home = Environment.GetEnvironmentVariable("HOME");
+    dataDirectory = !string.IsNullOrWhiteSpace(home)
+        ? Path.Combine(home, "data")
+        : Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+}
+Directory.CreateDirectory(dataDirectory);
 
 // Single DbContext registration (point to the same DB and migrations assembly)
-var dbPath = Path.Combine(builder.Environment.ContentRootPath, "chirp.db");
+var dbPath = Path.Combine(dataDirectory, "chirp.db");
 builder.Services.AddDbContext<ChirpDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("Chirp.Infrastructure"))
 );
@@ -71,8 +89,9 @@ builder.Services.AddAuthentication(options =>
     .AddCookie()
     .AddGitHub(o =>
     {
-        o.ClientId = builder.Configuration["authentication:github:clientId"];
-        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"];
+        // These values should be provided via configuration (App Service application settings).
+        o.ClientId = builder.Configuration["authentication:github:clientId"]!;
+        o.ClientSecret = builder.Configuration["authentication:github:clientSecret"]!;
         o.CallbackPath = "/signin-github";
     });
 // --------------------------------------------
@@ -82,6 +101,23 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
+}
+
+// Ensure database is created/migrated and seeded on startup (important for first-run on Azure App Service)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
+    try
+    {
+        Chirp.Infrastructure.Data.DbInitializer.SeedDatabase(db);
+    }
+    catch (Exception ex)
+    {
+        // Log and rethrow to surface startup errors in App Service logs
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+        logger.LogError(ex, "Failed to migrate/seed the database at path {DbPath}", dbPath);
+        throw;
+    }
 }
 
 app.UseStaticFiles();
