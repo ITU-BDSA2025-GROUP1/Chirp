@@ -74,7 +74,7 @@ public class CheepRepository : ICheepRepository
         {
             Text = text.Trim(),
             Timestamp = timestamp ?? DateTime.UtcNow,
-            AuthorId = author.AuthorId
+            AuthorId = author.Id
         };
 
         _db.Cheeps.Add(cheep);
