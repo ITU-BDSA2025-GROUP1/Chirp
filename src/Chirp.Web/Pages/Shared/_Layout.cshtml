@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -16,9 +16,8 @@
                 <a href = "/@(User.Identity.Name)"> My timeline </a> 
                 <a href = "/" > Public timeline </a>
                 <!-- Add a logout -->
-                <form method="post" action="/Account/Logout">
-                    <button type="submit"> Logout (@User.Identity.Name) </button>
-                </form>
+                <a href = "/Account/Logout"> Logout </a>
+
             </div>
         }       
         else 

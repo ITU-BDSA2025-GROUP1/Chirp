@@ -1,0 +1,37 @@
+@page
+@model Chirp.Web.Pages.Account.LoginModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<h2>Login</h2>
+
+<form method="post">
+    <!-- existing local login fields -->
+    <div class="mb-3">
+        <label asp-for="Input.Email"></label>
+        <input asp-for="Input.Email" class="form-control" />
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.Password"></label>
+        <input asp-for="Input.Password" class="form-control" />
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="Input.RememberMe" class="form-check-input" />
+        <label asp-for="Input.RememberMe" class="form-check-label"></label>
+    </div>
+    <button type="submit" class="btn btn-primary">Log in</button>
+</form>
+
+<hr />
+
+<form method="post" asp-page-handler="GitHub">
+    <button type="submit" class="btn btn-secondary">
+        <img src="/images/github-mark.svg" alt="" style="height:1rem;vertical-align:middle;" />
+        Login with GitHub
+    </button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
