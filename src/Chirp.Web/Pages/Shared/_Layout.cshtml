@@ -1,4 +1,16 @@
 ﻿<!DOCTYPE html>
+@using Chirp.Core.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Author> UserManager
+@{
+    string? displayName = null;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        displayName = currentUser?.Name ?? currentUser?.UserName ?? User.Identity?.Name;
+    }
+}
+
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -13,7 +25,7 @@
         @if (User.Identity?.IsAuthenticated == true)
         { 
             <div class = "navigation-links">
-                <a href = "/@(User.Identity.Name)"> My timeline </a> 
+                <a href = "/@displayName"> My timeline </a> 
                 <a href = "/" > Public timeline </a>
                 <!-- Add a logout -->
                 <a href = "/Account/Logout"> Logout </a>
@@ -35,10 +47,10 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <div class="cheepbox">
-            <h3>What's on your mind @(User.Identity?.Name)?</h3>
+            <h3>What's on your mind @displayName?</h3>
             <form method="post">
-                <input type="text" name="text" style="float: left" />
-                <input type="submit" value="Share" />
+                <input type="text" name="text" class="cheep-input" />
+                <button type="submit" class="cheep-btn">Share</button>
             </form>
         </div>
     }
@@ -53,5 +65,8 @@
 </body>
 @await RenderSectionAsync("Scripts", required: false)
 </html>
+
+
+
 
 

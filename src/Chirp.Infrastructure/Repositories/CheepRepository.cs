@@ -60,6 +60,14 @@ public class CheepRepository : ICheepRepository
 
         var author = _db.Authors.SingleOrDefault(a => a.Name == authorName);
         if (author == null)
+        {
+            author = _db.Authors.SingleOrDefault(a => a.Email == authorName);
+        }
+        if (author == null)
+        {
+            author = _db.Authors.SingleOrDefault(a => a.UserName == authorName);
+        }
+        if (author == null)
             return false;
 
         var cheep = new Cheep
