@@ -53,6 +53,7 @@ public class WebAppFactory : WebApplicationFactory<global::Program>
             db.Database.EnsureCreated();
 
             // Seed the DB
+            //"comment"
             DbInitializer.SeedTestDataBase(db);
         });
     }
