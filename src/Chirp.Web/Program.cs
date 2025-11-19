@@ -94,7 +94,6 @@ builder.Services.AddAuthentication(options =>
         o.ClientSecret = builder.Configuration["authentication:github:clientSecret"]!;
         o.CallbackPath = "/signin-github";
     });
-// --------------------------------------------
 
 var app = builder.Build();
 
