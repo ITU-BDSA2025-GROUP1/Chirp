@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -10,7 +10,7 @@
     <h1><img src="/images/icon1.png" alt="Icon1"/>Chirp!</h1>
 
     <div class = "navigation">
-        @if (User.Identity.IsAuthenticated)
+        @if (User.Identity?.IsAuthenticated == true)
         { 
             <div class = "navigation-links">
                 <a href = "/@(User.Identity.Name)"> My timeline </a> 
@@ -18,7 +18,7 @@
                 <!-- Add a logout -->
                 <form method="post" action="/Account/Logout">
                     <button type="submit"> Logout (@User.Identity.Name) </button>
-
+                </form>
             </div>
         }       
         else 
@@ -33,15 +33,16 @@
         }
     </div>
 
-    <!-- Send cheeps: only available when logged in -->
-    <div class = "cheepbox">
-        <h3> What's on your mind @User.Identity.Name)? </h3>
-        <form method = "post">
-            <input style = "float: left", type = "text" asp-for = "Text" >
-            <input type = "submit" value= "Share" >
-        </form>
-    </div>
-
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="cheepbox">
+            <h3>What's on your mind @(User.Identity?.Name)?</h3>
+            <form method="post">
+                <input type="text" name="text" style="float: left" />
+                <input type="submit" value="Share" />
+            </form>
+        </div>
+    }
     <div class=body>
             @RenderBody()
     </div>
@@ -53,3 +54,5 @@
 </body>
 @await RenderSectionAsync("Scripts", required: false)
 </html>
+
+

@@ -292,3 +292,23 @@ ul.nav li a {
 ul.nav li a:hover {
     background-color: #8b4949;
 }
+
+.cheepbox textarea {
+   width: 100%; 
+   padding: 6px; 
+   margin-bottom: 6px; 
+   font: inherit; 
+  }
+
+.cheepbox .cheep-btn {
+   background:#571010; 
+   color:#fff; 
+   border:1px solid #3b0707; 
+   padding:6px 14px; 
+   border-radius:4px; 
+   cursor:pointer; 
+  }
+
+.cheepbox .cheep-btn:hover { 
+  background:#6b1616; 
+}

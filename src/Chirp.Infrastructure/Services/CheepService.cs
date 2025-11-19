@@ -1,5 +1,4 @@
 using Chirp.Core.DTOs;
-using Chirp.Core.Entities;
 using Chirp.Core.Interfaces;
 using System.Globalization;
 
@@ -34,31 +33,15 @@ public class CheepService : ICheepService
             .ToList();
     }
 
-    public bool CreateCheep(Author author, string text, DateTime? timestamp = null)
+    public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
     {
-        //if (text.Length > 160) return false;
-
-        /*
-            Change Author author in signature to be string author and lookup the author in the author table
-            var authorEntity = _authorRepo.GetAuthorByName(author);
-            And change Author = authorEntity in the Cheep object below
-        */
-
-        //var cheep = new Core.Entities.Cheep
-        //{
-        //Text = text,
-        //Timestamp = timestamp ?? DateTime.UtcNow,
-        //Author = author //Change to Author = authorEntity
-        //};
-
-        if (string.IsNullOrWhiteSpace(author.Name)) return false;
+        if (string.IsNullOrWhiteSpace(authorName)) return false;
         if (string.IsNullOrWhiteSpace(text)) return false;
-
         if (text.Length > 280) return false;
 
-        return _repo.CreateCheep(author.Name, text, timestamp);
+        return _repo.CreateCheep(authorName, text, timestamp);
     }
-
     private static string FormatTs(DateTime dtUtc)
         => dtUtc.ToUniversalTime().ToString("HH:mm:ss dd MMM yyyy", CultureInfo.InvariantCulture);  // MMM = Oct, MMMM = October, yyyy = 2025, yy = 25
 }
+
