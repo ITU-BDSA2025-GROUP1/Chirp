@@ -44,6 +44,9 @@ Chirp! is a teaching/sample application that demonstrates:
 5. Run tests:
    - From repo root:
      dotnet test
+   - Playwright tests:
+     playwright install
+     dotnet test --filter FullyQualifiedName~CheepUiAndE2ETests
 
 ## Database and migrations
 - This project uses SQLite in development and on App Service (no SQL Server required).
