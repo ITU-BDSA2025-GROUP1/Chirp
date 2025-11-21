@@ -1,0 +1,42 @@
+@page "/About"  
+@using Chirp.Core.DTOs
+@model Chirp.Web.Pages.AboutModel
+
+@{
+    ViewData["Title"] = "About Me";
+    Layout = "Shared/_Layout";
+}
+
+<div class = "aboutMe-page">
+    <h2>About me</h2>
+
+    <div class="aboutMe-info">
+        <p><strong>Userame:</strong> @Model.DisplayName</p>
+        <p><strong>Email:</strong> @Model.Email</p>
+        <p><strong>Following:</strong> @Model.UserInfo.FollowingCount</p>
+        <p><strong>Followers:</strong> @Model.UserInfo.FollowerCount</p>
+        <p><strong>Total cheeps:</strong> @Model.UserInfo.CheepCount</p>
+    </div>
+
+    <section class = "aboutMe-cheeps">
+        <h3>My Cheeps</h3>
+        @if (Model.Cheeps != null && Model.Cheeps.Count > 0)
+        {
+            <ul class "cheeps">
+                @foreach (var cheep in Model.Cheeps)
+                {
+                    <li>
+                        <p>@cheep.Message</p>
+                        <small>Posted on: @cheep.Timestamp</small>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>You have not posted any cheeps yet. Try to post one!</p>
+        }
+
+    </section>
+
+</div>        

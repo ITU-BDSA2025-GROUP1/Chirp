@@ -25,7 +25,7 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
         modelBuilder.Entity<Cheep>(b =>
         {
             b.HasKey(c => c.CheepId);
-            b.Property(c => c.Text).IsRequired().HasMaxLength(280);
+            b.Property(c => c.Text).IsRequired().HasMaxLength(160);
 
             // Ensure DateTime is tracked as UTC
             b.Property(c => c.Timestamp)
