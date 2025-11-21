@@ -1,0 +1,138 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.Playwright;
+using Xunit;
+
+namespace Chirp.Tests;
+
+public class CheepUiAndE2ETests : IAsyncLifetime
+{
+    private IPlaywright _pw = null!;
+    private IBrowser _browser = null!;
+    private IPage _page = null!;
+    private System.Diagnostics.Process? _serverProcess;
+
+    // Adjust if your dev server runs on a different port
+    private const string BaseUrl = "http://localhost:5273";
+
+    public async Task InitializeAsync()
+    {
+        _pw = await Playwright.CreateAsync();
+        _browser = await _pw.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        _page = await _browser.NewPageAsync();
+        await EnsureServerRunningAsync();
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _browser.CloseAsync();
+        _pw.Dispose();
+        if (_serverProcess != null && !_serverProcess.HasExited)
+        {
+            try { _serverProcess.Kill(entireProcessTree: true); } catch { /* ignore */ }
+            _serverProcess.Dispose();
+        }
+    }
+
+    [Fact(DisplayName = "Cheep form hidden when logged out")]
+    public async Task CheepForm_Hidden_When_LoggedOut()
+    {
+        await _page.GotoAsync(BaseUrl + "/");
+        var form = _page.Locator("#cheep-form");
+        Assert.False(await form.IsVisibleAsync());
+        var reminder = _page.GetByTestId("login-reminder");
+        Assert.True(await reminder.IsVisibleAsync());
+    }
+
+    [Fact(DisplayName = "Cheep form visible after registration/login")]
+    public async Task CheepForm_Visible_After_Login()
+    {
+        await RegisterNewUserAsync();
+        await _page.GotoAsync(BaseUrl + "/");
+        Assert.True(await _page.Locator("#cheep-form").IsVisibleAsync());
+        Assert.True(await _page.GetByTestId("cheep-input").IsVisibleAsync());
+    }
+
+    [Fact(DisplayName = "Cheep longer than 160 chars shows validation error")]
+    public async Task Cheep_TooLong_ShowsError()
+    {
+        await RegisterNewUserAsync();
+        await _page.GotoAsync(BaseUrl + "/");
+        var longText = new string('A', 161);
+        await _page.GetByTestId("cheep-input").FillAsync(longText);
+        await _page.GetByTestId("cheep-submit").ClickAsync();
+        // Stay on page (no redirect) and validation summary appears
+        var error = _page.GetByTestId("cheep-error");
+        await error.WaitForAsync();
+        Assert.Contains("160", await error.InnerTextAsync());
+    }
+
+    [Fact(DisplayName = "Posting cheep persists and appears in timeline")]
+    public async Task PostCheep_PersistsAndAppears()
+    {
+        await RegisterNewUserAsync();
+        await _page.GotoAsync(BaseUrl + "/");
+        var message = "E2E Test Cheep " + Guid.NewGuid();
+        await _page.GetByTestId("cheep-input").FillAsync(message);
+        await _page.GetByTestId("cheep-submit").ClickAsync();
+        // Redirect reloads timeline; wait for message list containing our text
+        await _page.WaitForSelectorAsync($"text={message}");
+        Assert.True(await _page.GetByText(message).IsVisibleAsync());
+    }
+
+    private async Task RegisterNewUserAsync()
+    {
+        var unique = Guid.NewGuid().ToString("N").Substring(0, 8);
+        var email = $"test_{unique}@example.com";
+        var password = "Passw0rd!"; // Must satisfy password policy
+
+        await _page.GotoAsync(BaseUrl + "/Account/Register");
+        await _page.FillAsync("input[name=\"Input.Name\"]", "TestUser" + unique);
+        await _page.FillAsync("input[name=\"Input.Email\"]", email);
+        await _page.FillAsync("input[name=\"Input.Password\"]", password);
+        await _page.FillAsync("input[name=\"Input.ConfirmPassword\"]", password);
+        await _page.ClickAsync("button:has-text('Register')");
+
+        // After successful registration we should be redirected to home
+        await _page.WaitForURLAsync(url => url.StartsWith(BaseUrl + "/"));
+    }
+
+    private async Task EnsureServerRunningAsync()
+    {
+        // Probe if server already up
+        try
+        {
+            using var client = new System.Net.Http.HttpClient();
+            client.Timeout = TimeSpan.FromMilliseconds(500);
+            var resp = await client.GetAsync(BaseUrl + "/");
+            if (resp.IsSuccessStatusCode) return; // already running externally
+        }
+        catch { /* start below */ }
+
+        var root = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "../../../../"));
+        var webProj = System.IO.Path.Combine(root, "src", "Chirp.Web", "Chirp.Web.csproj");
+        var psi = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "dotnet",
+            Arguments = $"run --project \"{webProj}\" --urls {BaseUrl}",
+            WorkingDirectory = root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+        _serverProcess = System.Diagnostics.Process.Start(psi);
+        // Wait for readiness
+        var client2 = new System.Net.Http.HttpClient();
+        for (int i = 0; i < 40; i++)
+        {
+            await Task.Delay(250);
+            try
+            {
+                var resp = await client2.GetAsync(BaseUrl + "/");
+                if (resp.IsSuccessStatusCode) return;
+            }
+            catch { }
+        }
+        throw new Exception("Server did not start within timeout for Playwright tests.");
+    }
+}

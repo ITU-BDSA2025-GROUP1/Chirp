@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.Playwright;
 using Xunit;
 
+// This is a basic smoke test to verify that Playwright is set up correctly. It does not test any application functionality.
 public class PlaywrightSmokeTests
 {
     [Fact]
