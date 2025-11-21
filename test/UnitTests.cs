@@ -104,7 +104,7 @@ public class FakeCheepService : ICheepService
         };
     }
 
-    public bool CreateCheep(Author author, string text, DateTime? timestamp = null)
+    public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
     {
         return true;
     }
