@@ -1,5 +1,4 @@
-﻿<!DOCTYPE html>
-@using Chirp.Core.Entities
+﻿@using Chirp.Core.Entities
 @using Microsoft.AspNetCore.Identity
 @inject UserManager<Author> UserManager
 @{
@@ -9,8 +8,10 @@
         var currentUser = await UserManager.GetUserAsync(User);
         displayName = currentUser?.Name ?? currentUser?.UserName ?? User.Identity?.Name;
     }
-}
 
+    var showCheepForm = (ViewData["ShowCheepForm"] as bool?) ?? false;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -45,7 +46,7 @@
         }
     </div>
 
-    @if (User.Identity?.IsAuthenticated == true)
+    @if (showCheepForm && User.Identity?.IsAuthenticated == true)
     {
         <div class="cheepbox">
             <h3>What's on your mind @displayName?</h3>
@@ -66,6 +67,7 @@
 </body>
 @await RenderSectionAsync("Scripts", required: false)
 </html>
+
 
 
 

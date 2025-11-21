@@ -3,6 +3,7 @@
 @model Chirp.Web.Pages.UserTimelineModel
 @{
     ViewData["Title"] = "Chirp!";
+    ViewData["ShowCheepForm"] = true;
     Layout = "Shared/_Layout";
     var routeName = HttpContext.GetRouteValue("author");
 }
