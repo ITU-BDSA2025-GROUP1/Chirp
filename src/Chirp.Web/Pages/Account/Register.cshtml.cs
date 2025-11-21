@@ -48,7 +48,7 @@ public class RegisterModel : PageModel
     public class InputModel
     {
         [Required]
-        [Display(Name = "Full name")]
+        [Display(Name = "Username")]
         public string Name { get; set; } = string.Empty;
 
         [Required]

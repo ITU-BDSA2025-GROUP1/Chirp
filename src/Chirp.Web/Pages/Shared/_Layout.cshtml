@@ -1,4 +1,16 @@
 ﻿<!DOCTYPE html>
+@using Chirp.Core.Entities
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<Author> UserManager
+@{
+    string? displayName = null;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        var currentUser = await UserManager.GetUserAsync(User);
+        displayName = currentUser?.Name ?? currentUser?.UserName ?? User.Identity?.Name;
+    }
+}
+
 <html lang="en">
 <head>
     <title>@ViewData["Title"]</title>
@@ -10,10 +22,10 @@
     <h1><img src="/images/icon1.png" alt="Icon1"/>Chirp!</h1>
 
     <div class = "navigation">
-        @if (User.Identity.IsAuthenticated)
+        @if (User.Identity?.IsAuthenticated == true)
         { 
-            <div class ="navigation-links">
-                <a href = "/@(User.Identity.Name)"> My timeline </a> 
+            <div class = "navigation-links">
+                <a href = "/@displayName"> My timeline </a> 
                 <a href = "/" > Public timeline </a>
                 <a href = "/About" > About me </a> <!-- name, email, following, all cheeps of user etc. -->
                 <!-- Add a logout -->
@@ -23,7 +35,7 @@
         }       
         else 
         {
-            <div class ="navigation-links">
+            <div class = "navigation-links">
                 <a href = "/" > Public timeline </a>
                 <!-- Add a register -->
                 <a href = "/Account/Register"> Register </a>
@@ -33,6 +45,16 @@
         }
     </div>
 
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="cheepbox">
+            <h3>What's on your mind @displayName?</h3>
+            <form method="post">
+                <input type="text" name="text" class="cheep-input" />
+                <button type="submit" class="cheep-btn">Share</button>
+            </form>
+        </div>
+    }
     <div class=body>
             @RenderBody()
     </div>
@@ -44,3 +66,8 @@
 </body>
 @await RenderSectionAsync("Scripts", required: false)
 </html>
+
+
+
+
+

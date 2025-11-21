@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Chirp.Core.DTOs;
 using Chirp.Core.Interfaces;
@@ -25,5 +25,23 @@ public class UserTimelineModel : PageModel
         CurrentPage = page;
         Cheeps = _service.GetCheepsFromAuthor(author, page);
         return Page();
+    }
+
+    public ActionResult OnPost(string author, [FromForm] string text)
+    {
+        if (string.IsNullOrWhiteSpace(author))
+        {
+            return RedirectToPage("/Public");
+        }
+
+        var currentUser = User?.Identity?.Name;
+        var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+
+        if (isAuthenticated && !string.IsNullOrWhiteSpace(currentUser) && !string.IsNullOrWhiteSpace(text))
+        {
+            _service.CreateCheep(currentUser!, text);
+        }
+
+        return RedirectToPage("/UserTimeline", new { author });
     }
 }

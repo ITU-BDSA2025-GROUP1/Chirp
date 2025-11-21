@@ -8,4 +8,6 @@ public interface ICheepRepository
     List<Cheep> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32);
 
     Boolean CreateCheep(Cheep cheep);
+
+    Boolean CreateCheep(string authorName, string text, DateTime? timestamp = null);
 }
