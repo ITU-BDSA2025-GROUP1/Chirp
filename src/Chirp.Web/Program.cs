@@ -1,3 +1,4 @@
+// Program.cs - force SQLite and skip migrations/seeding in "Testing" environment
 using Chirp.Infrastructure.Data;
 using Chirp.Core.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -16,8 +17,6 @@ using Microsoft.Extensions.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- Always use SQLite: compute a writable DB path for Azure and for local dev ---
-// On Azure App Service HOME is set (e.g., D:\home); use HOME\data as recommended.
-// Locally use {ContentRootPath}/App_Data (create if missing).
 string dataDirectory;
 var home = Environment.GetEnvironmentVariable("HOME"); // set by App Service
 if (!string.IsNullOrEmpty(home))
@@ -82,7 +81,7 @@ builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSe
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
-// GitHub OAuth registration (left unchanged - only enabled if config present)
+// GitHub OAuth registration (only enabled if config present)
 var githubClientId = builder.Configuration["authentication:github:clientId"];
 var githubClientSecret = builder.Configuration["authentication:github:clientSecret"];
 var githubAuthEnabled = !string.IsNullOrWhiteSpace(githubClientId) && !string.IsNullOrWhiteSpace(githubClientSecret);
@@ -108,7 +107,6 @@ if (!githubAuthEnabled)
     startupLogger.LogWarning("GitHub OAuth not configured. Set authentication:github:clientId and authentication:github:clientSecret to enable external login.");
 }
 
-// Only redirect to HTTPS in non-development (keeps local dev flexible)
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
@@ -130,7 +128,7 @@ app.Use(async (context, next) =>
 
 app.UseSession();
 
-// Ensure DB and migrations exist on startup
+// --- Ensure DB and migrations exist on boot, but SKIP when running tests (Testing env) ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -138,33 +136,27 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = services.GetRequiredService<ChirpDbContext>();
-        logger.LogInformation("Applying migrations / ensuring database exists at {DbPath}", dbPath);
-        db.Database.Migrate();
-        logger.LogInformation("Migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Error applying migrations on startup");
-        // Re-throw to let App Service show 500 and the logs; comment this out if you prefer app to start anyway.
-        throw;
-    }
-}
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    try
-    {
-        var db = services.GetRequiredService<ChirpDbContext>();
-        logger.LogInformation("Seeding database (if required)...");
-        DbInitializer.SeedDatabase(db); // calls Migrate() then seeds if missing
-        logger.LogInformation("Database seeding complete.");
+        if (!app.Environment.IsEnvironment("Testing"))
+        {
+            // Production / Development startup: apply migrations and seed if needed
+            logger.LogInformation("Applying migrations / ensuring database exists at {DbPath}", dbPath);
+            db.Database.Migrate();
+            logger.LogInformation("Migrations applied successfully.");
+
+            logger.LogInformation("Seeding database (if required)...");
+            DbInitializer.SeedDatabase(db); // calls Migrate() internally, but we already migrated - safe
+            logger.LogInformation("Database seeding complete.");
+        }
+        else
+        {
+            // Tests will configure their own DbContext and seeding - avoid conflicts
+            logger.LogInformation("Testing environment detected; skipping Program.cs migrations/seeding.");
+        }
     }
     catch (Exception ex)
     {
-        logger.LogError(ex, "Database seeding failed.");
-        // either rethrow so you see startup error, or swallow if you want app to continue
+        logger.LogError(ex, "Error applying migrations or seeding on startup");
         throw;
     }
 }
