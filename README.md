@@ -44,8 +44,9 @@ Chirp! is a teaching/sample application that demonstrates:
 5. Run tests:
    - From repo root:
      dotnet test
-   - Playwright tests:
+   - First-time setup for Playwright (install browsers once):
      playwright install
+   - Run only Playwright UI/E2E tests:
      dotnet test --filter FullyQualifiedName~CheepUiAndE2ETests
 
 ## Database and migrations
