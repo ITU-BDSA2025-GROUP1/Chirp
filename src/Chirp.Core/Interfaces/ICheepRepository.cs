@@ -10,4 +10,6 @@ public interface ICheepRepository
     Boolean CreateCheep(Cheep cheep);
 
     Boolean CreateCheep(string authorName, string text, DateTime? timestamp = null);
+
+    int CountCheep(string authorName);
 }

@@ -1,3 +1,4 @@
+using Chirp.Core.DTOs;
 using Chirp.Core.Entities;
 using Chirp.Core.Interfaces;
 using Chirp.Infrastructure.Data;
@@ -33,6 +34,9 @@ public class CheepRepository : ICheepRepository
         if (string.IsNullOrWhiteSpace(author)) return new();
         if (page < 1) page = 1;
         if (pageSize < 1) pageSize = 32;
+
+        Console.WriteLine("This is the username: " + author);
+        Console.WriteLine("This is the page: " + page);
 
         return _db.Cheeps
             .AsNoTracking()
@@ -80,6 +84,21 @@ public class CheepRepository : ICheepRepository
         _db.Cheeps.Add(cheep);
         return _db.SaveChanges() > 0;
 
+    }
+
+    public int CountCheep(string authorName)
+    {
+        if (string.IsNullOrWhiteSpace(authorName)) {
+            return 0;
+        }
+
+        List<Cheep> cheeps = _db.Cheeps
+            .AsNoTracking()
+            .Include(c => c.Author)
+            .Where(c => c.Author.Name == authorName)
+            .ToList();
+
+        return cheeps.Count;
     }
 
 }

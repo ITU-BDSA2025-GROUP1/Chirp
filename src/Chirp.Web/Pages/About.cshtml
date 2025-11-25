@@ -22,7 +22,7 @@
         <h3>My Cheeps</h3>
         @if (Model.Cheeps != null && Model.Cheeps.Count > 0)
         {
-            <ul class "cheeps">
+            <ul class="cheeps">
                 @foreach (var cheep in Model.Cheeps)
                 {
                     <li>
@@ -31,6 +31,18 @@
                     </li>
                 }
             </ul>
+
+            <div class="pagination">
+                @if (Model.HasPreviousPage)
+                {
+                    <a href="/About?page=@(Model.CurrentPage - 1)">« Previous</a>
+                }
+                <span>Page @Model.CurrentPage</span>
+                @if (Model.HasNextPage)
+                {
+                    <a href="/About?page=@(Model.CurrentPage + 1)">Next »</a>
+                }
+            </div>
         }
         else
         {

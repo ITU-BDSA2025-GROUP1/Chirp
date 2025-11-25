@@ -11,6 +11,7 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 
     public DbSet<Author> Authors => Set<Author>();
     public DbSet<Cheep> Cheeps => Set<Cheep>();
+    public int CheepCount => 0;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

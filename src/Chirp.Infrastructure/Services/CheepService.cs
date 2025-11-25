@@ -41,6 +41,13 @@ public class CheepService : ICheepService
 
         return _repo.CreateCheep(authorName, text, timestamp);
     }
+
+    public int CountCheep(string authorName)
+    {
+        if (string.IsNullOrWhiteSpace(authorName)) return 0;
+
+        return _repo.CountCheep(authorName);
+    }
     private static string FormatTs(DateTime dtUtc)
         => dtUtc.ToUniversalTime().ToString("HH:mm:ss dd MMM yyyy", CultureInfo.InvariantCulture);  // MMM = Oct, MMMM = October, yyyy = 2025, yy = 25
 }
