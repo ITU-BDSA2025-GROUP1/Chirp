@@ -102,8 +102,7 @@ public class CheepUiAndE2ETests : IAsyncLifetime
         // Probe if server already up
         try
         {
-            using var client = new System.Net.Http.HttpClient();
-            client.Timeout = TimeSpan.FromMilliseconds(500);
+            using var client = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromMilliseconds(500) };
             var resp = await client.GetAsync(BaseUrl + "/");
             if (resp.IsSuccessStatusCode) return; // already running externally
         }
@@ -111,28 +110,63 @@ public class CheepUiAndE2ETests : IAsyncLifetime
 
         var root = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppContext.BaseDirectory, "../../../../"));
         var webProj = System.IO.Path.Combine(root, "src", "Chirp.Web", "Chirp.Web.csproj");
+
         var psi = new System.Diagnostics.ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"run --project \"{webProj}\" --urls {BaseUrl}",
+            // use --no-build in CI (assumes solution was built earlier) - removes build overhead
+            Arguments = $"run --no-build --project \"{webProj}\" --urls {BaseUrl}",
             WorkingDirectory = root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false
         };
+
+        // Ensure ASPNETCORE_URLS is set for the process environment in case project uses env var
+        psi.Environment["ASPNETCORE_URLS"] = BaseUrl;
+
+        var outputSb = new System.Text.StringBuilder();
         _serverProcess = System.Diagnostics.Process.Start(psi);
-        // Wait for readiness
-        var client2 = new System.Net.Http.HttpClient();
-        for (int i = 0; i < 40; i++)
+
+        if (_serverProcess == null)
+            throw new Exception($"Failed to start dotnet process for project {webProj}");
+
+        // capture output for diagnostics
+        _serverProcess.OutputDataReceived += (s, e) => { if (e.Data != null) outputSb.AppendLine(e.Data); };
+        _serverProcess.ErrorDataReceived += (s, e) => { if (e.Data != null) outputSb.AppendLine(e.Data); };
+        _serverProcess.BeginOutputReadLine();
+        _serverProcess.BeginErrorReadLine();
+
+        // if process exits early, include its output in the exception
+        _serverProcess.EnableRaisingEvents = true;
+        var tcsExited = new TaskCompletionSource<int>();
+        _serverProcess.Exited += (_, __) => tcsExited.TrySetResult(_serverProcess.ExitCode);
+
+        // Wait for readiness by polling — increase timeout to 60s
+        var client2 = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(1) };
+        var maxAttempts = 120; // ~60 seconds (120 * 500ms)
+        for (int i = 0; i < maxAttempts; i++)
         {
-            await Task.Delay(250);
+            // if process exited prematurely, throw with captured output
+            if (tcsExited.Task.IsCompleted)
+            {
+                var outText = outputSb.ToString();
+                throw new Exception($"Server process exited (code {_serverProcess.ExitCode}). Output:\n{outText}");
+            }
+
             try
             {
+                await Task.Delay(500);
                 var resp = await client2.GetAsync(BaseUrl + "/");
                 if (resp.IsSuccessStatusCode) return;
+                // accept redirect (301/302) as indication the server is up
+                if ((int)resp.StatusCode >= 300 && (int)resp.StatusCode < 400) return;
             }
-            catch { }
+            catch { /* ignore and retry */ }
         }
-        throw new Exception("Server did not start within timeout for Playwright tests.");
+
+        // timed out; include last output
+        var lastOutput = outputSb.ToString();
+        throw new Exception($"Server did not start within timeout for Playwright tests. Process output:\n{lastOutput}");
     }
 }
