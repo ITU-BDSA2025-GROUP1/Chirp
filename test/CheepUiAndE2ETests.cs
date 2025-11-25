@@ -114,8 +114,8 @@ public class CheepUiAndE2ETests : IAsyncLifetime
         var psi = new System.Diagnostics.ProcessStartInfo
         {
             FileName = "dotnet",
-            // use --no-build in CI (assumes solution was built earlier) - removes build overhead
-            Arguments = $"run --no-build --project \"{webProj}\" --urls {BaseUrl}",
+            // build Release on demand to avoid serving stale binaries when running tests locally
+            Arguments = $"run --configuration Release --project \"{webProj}\" --urls {BaseUrl}",
             WorkingDirectory = root,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -124,6 +124,9 @@ public class CheepUiAndE2ETests : IAsyncLifetime
 
         // Ensure ASPNETCORE_URLS is set for the process environment in case project uses env var
         psi.Environment["ASPNETCORE_URLS"] = BaseUrl;
+        // Force Development environment so Kestrel keeps HTTP enabled (Production defaults to HTTPS-only which breaks tests)
+        psi.Environment["ASPNETCORE_ENVIRONMENT"] = "Development";
+        psi.Environment["DOTNET_ENVIRONMENT"] = "Development";
 
         var outputSb = new System.Text.StringBuilder();
         _serverProcess = System.Diagnostics.Process.Start(psi);
