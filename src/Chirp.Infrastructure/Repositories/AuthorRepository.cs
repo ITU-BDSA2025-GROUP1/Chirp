@@ -17,7 +17,10 @@ public class AuthorRepository : IAuthorRepository
 
     public Author? GetAuthorByName(string name)
     {
-        return _db.Authors.FirstOrDefault(a => a.Name == name);
+        return _db.Authors
+        .Include(a => a.Following)
+        .Include(a => a.Followers)
+        .FirstOrDefault(a => a.Name == name);
 
     }
 
@@ -39,4 +42,50 @@ public class AuthorRepository : IAuthorRepository
         }
     }
 
+    public void Follow(string followerName, string followeeName)
+    {
+        var follower = GetAuthorByName(followerName);
+        var followee = GetAuthorByName(followeeName);
+
+        if (follower == null || followee == null)
+        {
+            throw new InvalidOperationException("Follower or followee does not exist.");
+        }
+
+        if (!follower.Following.Contains(followee))
+        {
+            follower.Following.Add(followee);
+            _db.SaveChanges();
+        }
+    }
+
+    public void Unfollow(string followerName, string followeeName)
+    {
+        var follower = GetAuthorByName(followerName);
+        var followee = GetAuthorByName(followeeName);
+
+        if (follower == null || followee == null)
+        {
+            throw new InvalidOperationException("Follower or followee does not exist.");
+        }
+
+        if (follower.Following.Contains(followee))
+        {
+            follower.Following.Remove(followee);
+            _db.SaveChanges();
+        }
+    }
+
+    public bool IsFollowing(string followerName, string followeeName)
+    {
+        var follower = GetAuthorByName(followerName);
+        var followee = GetAuthorByName(followeeName);
+
+        if (follower == null || followee == null)
+        {
+            throw new InvalidOperationException("Follower or followee does not exist.");
+        }
+
+        return follower.Following.Contains(followee);
+    }
 }
