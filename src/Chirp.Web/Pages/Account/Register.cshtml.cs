@@ -68,11 +68,22 @@ public class RegisterModel : PageModel
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
-        _logger.LogInformation("Posted Input.Email='{Email}' Request.Form[Input.Email]={FormVal}", Input?.Email, Request.Form["Input.Email"]);
+        _logger.LogInformation("Posted Input.Email='{Email}' Request.Form[Input.Email]={FormVal}",
+            Input?.Email ?? string.Empty,
+            Request.Form["Input.Email"].ToString());
+
         _logger.LogInformation("ModelState valid: {Valid}; Errors: {Errors}", ModelState.IsValid,
-            string.Join(" | ", ModelState.Values.SelectMany(v=>v.Errors).Select(e=>e.ErrorMessage)));
+            string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
 
         returnUrl ??= Url.Content("~/");
+
+        // guard: ensure model-bound Input isn't null (removes CS8602 warning)
+        if (Input is null)
+        {
+            ModelState.AddModelError(string.Empty, "Invalid form submission.");
+            return Page();
+        }
+
         if (!ModelState.IsValid)
         {
             return Page();
@@ -80,21 +91,17 @@ public class RegisterModel : PageModel
 
         var user = new Author
         {
-            UserName = Input.Email,
-            Email = Input.Email,
-            Name = Input.Name
+            UserName = Input.Email ?? string.Empty,
+            Email = Input.Email ?? string.Empty,
+            Name = Input.Name ?? string.Empty
         };
 
-        _logger.LogWarning("Input.Email:'{Email}' Input.Name:'{Name}'", Input.Email, Input.Name);
-        _logger.LogWarning("user.Email:'{Email}' user.UserName:'{UserName}'", user.Email, user.UserName);
-        var result = await _userManager.CreateAsync(user, Input.Password);
+        var result = await _userManager.CreateAsync(user, Input?.Password ?? string.Empty);
         if (!result.Succeeded)
         {
             foreach (var err in result.Errors)
             {
-                _logger.LogWarning(user.Email);
                 ModelState.AddModelError(string.Empty, err.Description);
-                _logger.LogWarning("Register error: {Code} {Desc}", err.Code, err.Description);
             }
             return Page();
         }
