@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Chirp.Web.Pages;
 
@@ -81,6 +82,20 @@ public class AboutModel : PageModel
         public int FollowingCount { get; set; }
         public int FollowerCount { get; set; }
         public int CheepCount { get; set; }
+    }
+    
+    public async Task<IActionResult> OnPostForgetMeAsync()
+    {
+        var userId = User.Identity?.Name;
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        await _userService.ForgetAsync(userId);
+        await HttpContext.SignOutAsync();
+
+        return RedirectToPage("/");
     }
 }
 
