@@ -20,6 +20,7 @@
                             <a href="/@cheep.Author">@cheep.Author</a>
                         </strong>
                         
+                        @*Skal bruge noget andet end user.Identity.Name da den bruger email. Burde bruge AuthorId*@
                         @if (User.Identity?.IsAuthenticated == true && User.Identity.Name != cheep.Author)
                         {
                             @if (Model.IsFollowing(User.Identity.Name, cheep.Author))

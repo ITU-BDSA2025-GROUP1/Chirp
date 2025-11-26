@@ -66,7 +66,8 @@ public class UnitTests
     public void UserTimeLineModel_OnGet_ShouldGetCurrentPage()
     {
         var service = new FakeCheepService();
-        var model = new UserTimelineModel(service);
+        var authorRepository = new FakeAuthorRepository();
+        var model = new UserTimelineModel(service, authorRepository);
 
         model.OnGet("TestUser", 2);
 
@@ -80,7 +81,8 @@ public class UnitTests
     public void PublicTimeLineModel_OnGet_ShouldDefaultToPage1()
     {
         var service = new FakeCheepService();
-        var model = new UserTimelineModel(service);
+        var authorRepository = new FakeAuthorRepository();
+        var model = new UserTimelineModel(service, authorRepository);
 
         model.OnGet("TestUser", 1);
 
@@ -107,5 +109,48 @@ public class FakeCheepService : ICheepService
     public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
     {
         return true;
+    }
+}
+
+public class FakeAuthorRepository : IAuthorRepository
+{
+    public Author? GetAuthorByName(string name)
+    {
+        return new Author
+        {
+            AuthorId = 1,
+            Name = "TestUser",
+            Email = "testuser@example.com"
+        };
+    }
+
+    public Author? GetAuthorByEmail(string email)
+    {
+        return new Author
+        {
+            AuthorId = 1,
+            Name = "TestUser",
+            Email = "testuser@example.com"
+        };
+    }
+
+    public void AddAuthor(Author author)
+    {
+        // Do nothing
+    }
+
+    public void Follow(string followerName, string followeeName)
+    {
+        // Do nothing
+    }
+
+    public void Unfollow(string followerName, string followeeName)
+    {
+        // Do nothing
+    }
+
+    public bool IsFollowing(string followerName, string followeeName)
+    {
+        return false;
     }
 }
