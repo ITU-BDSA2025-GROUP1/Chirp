@@ -41,6 +41,18 @@ public class PublicModel : PageModel
     }
 
         private readonly IAuthorRepository _authorRepository;
+
+        public bool IsFollowing(string followerName, string followeeName)
+    {
+        try
+        {
+            return _authorRepository.IsFollowing(followerName, followeeName);
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+    }
         public async Task<IActionResult> OnPostFollowAsync(string authorName)
     {
         var currentUserName = User.Identity?.Name;

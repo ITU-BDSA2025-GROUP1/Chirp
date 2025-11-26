@@ -20,6 +20,26 @@
                         <strong>
                             <a href="/@cheep.Author">@cheep.Author</a>
                         </strong>
+                        
+                        @if (User.Identity?.IsAuthenticated == true && User.Identity.Name != cheep.Author)
+                        {
+                            @if (Model.IsFollowing(User.Identity.Name, cheep.Author))
+                            {
+                                <form method="post" asp-page-handler="Unfollow" style="display:inline;">
+                                    <input type="hidden" name="authorName" value="@cheep.Author" />
+                                    <button type="submit">Unfollow</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="Follow" style="display:inline;">
+                                    <input type="hidden" name="authorName" value="@cheep.Author" />
+                                    <button type="submit">Follow</button>
+                                </form>
+                            }
+                        }
+                    </p>
+                    <p>
                         @cheep.Message
                         <small>&mdash; @cheep.Timestamp</small>
                     </p>

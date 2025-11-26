@@ -8,13 +8,16 @@ namespace Chirp.Web.Pages;
 public class UserTimelineModel : PageModel
 {
     private readonly ICheepService _service;
+    private readonly IAuthorRepository _authorRepository;
+
     public List<CheepDTO> Cheeps { get; set; }
     public int CurrentPage { get; set; }
     public string Author { get; set; }
 
-    public UserTimelineModel(ICheepService service)
+    public UserTimelineModel(ICheepService service, IAuthorRepository authorRepository)
     {
         _service = service;
+        _authorRepository = authorRepository;
     }
 
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
@@ -45,7 +48,17 @@ public class UserTimelineModel : PageModel
         return RedirectToPage("/UserTimeline", new { author });
     }
 
-    private readonly IAuthorRepository _authorRepository;
+    public bool IsFollowing(string followerName, string followeeName)
+    {
+        try
+        {
+            return _authorRepository.IsFollowing(followerName, followeeName);
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+    }
         public async Task<IActionResult> OnPostFollowAsync(string authorName)
     {
         var currentUserName = User.Identity?.Name;
