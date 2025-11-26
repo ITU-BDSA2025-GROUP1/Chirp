@@ -86,16 +86,16 @@ public class AboutModel : PageModel
     
     public async Task<IActionResult> OnPostForgetMeAsync()
     {
-        var userId = User.Identity?.Name;
-        if (string.IsNullOrEmpty(userId))
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
         {
             return Unauthorized();
         }
 
-        await _userService.ForgetAsync(userId);
+        await _userManager.DeleteAsync(user);
         await HttpContext.SignOutAsync();
 
-        return RedirectToPage("/");
+        return RedirectToPage("/"); // Should hooopefully be the public timeline
     }
 }
 
