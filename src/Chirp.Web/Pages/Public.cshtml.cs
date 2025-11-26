@@ -8,7 +8,9 @@ namespace Chirp.Web.Pages;
 public class PublicModel : PageModel
 {
     private readonly ICheepService _service;
-    public List<CheepDTO> Cheeps { get; set; }
+
+    // keep a single property (DTOs) and initialize to avoid CS8618
+    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
 
     public PublicModel(ICheepService service)
@@ -57,5 +59,3 @@ public class PublicModel : PageModel
         Cheeps = _service.GetCheeps(page);
     }
 }
-
-
