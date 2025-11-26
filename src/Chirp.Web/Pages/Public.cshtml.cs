@@ -8,12 +8,14 @@ namespace Chirp.Web.Pages;
 public class PublicModel : PageModel
 {
     private readonly ICheepService _service;
+    private readonly IAuthorRepository _authorRepository;
     public List<CheepDTO> Cheeps { get; set; }
     public int CurrentPage { get; set; }
 
-    public PublicModel(ICheepService service)
+    public PublicModel(ICheepService service, IAuthorRepository authorRepository)
     {
         _service = service;
+        _authorRepository = authorRepository;
     }
 
     public ActionResult OnGet([FromQuery] int page = 1)
@@ -39,8 +41,6 @@ public class PublicModel : PageModel
 
         return RedirectToPage("/Public");
     }
-
-        private readonly IAuthorRepository _authorRepository;
 
         public bool IsFollowing(string followerName, string followeeName)
     {
