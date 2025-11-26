@@ -44,4 +44,47 @@ public class UserTimelineModel : PageModel
 
         return RedirectToPage("/UserTimeline", new { author });
     }
+
+    private readonly IAuthorRepository _authorRepository;
+        public async Task<IActionResult> OnPostFollowAsync(string authorName)
+    {
+        var currentUserName = User.Identity?.Name;
+        
+        if (string.IsNullOrEmpty(currentUserName))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        try
+        {
+            _authorRepository.Follow(currentUserName, authorName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Error handling to be done here
+        }
+
+        return RedirectToPage(new { author = authorName, page = CurrentPage });
+    }
+
+    public async Task<IActionResult> OnPostUnfollowAsync(string authorName)
+    {
+        var currentUserName = User.Identity?.Name;
+        
+        if (string.IsNullOrEmpty(currentUserName))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        try
+        {
+            _authorRepository.Unfollow(currentUserName, authorName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Error handling to be done here
+        }
+
+        return RedirectToPage(new { author = authorName, page = CurrentPage });
+    }
 }
