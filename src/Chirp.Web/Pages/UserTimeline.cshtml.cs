@@ -8,9 +8,11 @@ namespace Chirp.Web.Pages;
 public class UserTimelineModel : PageModel
 {
     private readonly ICheepService _service;
-    public List<CheepDTO> Cheeps { get; set; }
+
+    // initialize to avoid CS8618
+    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
-    public string Author { get; set; }
+    public string Author { get; set; } = string.Empty;
 
     public UserTimelineModel(ICheepService service)
     {
@@ -20,10 +22,10 @@ public class UserTimelineModel : PageModel
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
     {
         if (page < 1) page = 1;
-        
-        Author = author;
+
+        Author = author ?? string.Empty;
         CurrentPage = page;
-        Cheeps = _service.GetCheepsFromAuthor(author, page);
+        Cheeps = _service.GetCheepsFromAuthor(Author, page);
         return Page();
     }
 

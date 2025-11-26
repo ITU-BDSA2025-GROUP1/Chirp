@@ -15,9 +15,9 @@ public class CheepService : ICheepService
 
     public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32)
     {
-        var items = _repo.GetCheeps(page, pageSize);
+        var items = _repo.GetCheeps(page, pageSize) ?? Enumerable.Empty<Chirp.Core.Entities.Cheep>();
         return items.Select(c => new CheepDTO(
-                c.Author.Name,
+                c.Author?.Name ?? string.Empty,
                 c.Text,
                 FormatTs(c.Timestamp)))
             .ToList();
@@ -25,9 +25,9 @@ public class CheepService : ICheepService
 
     public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32)
     {
-        var items = _repo.GetCheepsFromAuthor(author, page, pageSize);
+        var items = _repo.GetCheepsFromAuthor(author, page, pageSize) ?? Enumerable.Empty<Chirp.Core.Entities.Cheep>();
         return items.Select(c => new CheepDTO(
-                c.Author.Name,
+                c.Author?.Name ?? string.Empty,
                 c.Text,
                 FormatTs(c.Timestamp)))
             .ToList();
