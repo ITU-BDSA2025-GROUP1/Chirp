@@ -10,13 +10,20 @@
 <div class = "aboutMe-page">
     <h2>About me</h2>
 
-    <div class="aboutMe-info">
-        <p><strong>Userame:</strong> @Model.DisplayName</p>
-        <p><strong>Email:</strong> @Model.Email</p>
-        <p><strong>Following:</strong> @Model.UserInfo.FollowingCount</p>
-        <p><strong>Followers:</strong> @Model.UserInfo.FollowerCount</p>
-        <p><strong>Total cheeps:</strong> @Model.UserInfo.CheepCount</p>
+    <div class = "aboutMe-info">
+        <p><strong>Userame:</strong> @Model.DisplayName </p>
+        <p><strong>Email:</strong> @Model.Email </p>
+        <p><strong>Following:</strong> @Model.UserInfo.FollowingCount </p>
+        <p><strong>Followers:</strong> @Model.UserInfo.FollowerCount </p>
+        <p><strong>Total cheeps:</strong> @Model.UserInfo.CheepCount </p>
     </div>
+
+    <form method = "post" asp-page-handler= "ForgetMe" onsubmit = "return confirmForgetMe();"> 
+        <button type = "submit" class "btn btn-danger">
+            Forget this account
+        </button>
+        <div class = "text-muted small mt-1"> Removes your profile and data. </div>
+    </form>
 
     <section class = "aboutMe-cheeps">
         <h3>My Cheeps</h3>
