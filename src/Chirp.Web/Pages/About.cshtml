@@ -25,6 +25,14 @@
         <div class = "text-muted small mt-1"> Removes your profile and data. </div>
     </form>
 
+    @section Scripts {
+        <script>
+            function confirmForgetMe() {
+                return confirm ("Are you sure you want to forget this account?")
+            }
+        </script>
+    }
+
     <section class = "aboutMe-cheeps">
         <h3>My Cheeps</h3>
         @if (Model.Cheeps != null && Model.Cheeps.Count > 0)
