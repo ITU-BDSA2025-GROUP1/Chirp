@@ -93,9 +93,11 @@ public class AboutModel : PageModel
         }
 
         await _userManager.DeleteAsync(user);
-        await HttpContext.SignOutAsync();
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-        return RedirectToPage("/"); // Should hooopefully be the public timeline
+        return RedirectToPage("/Public"); 
     }
+
 }
 
