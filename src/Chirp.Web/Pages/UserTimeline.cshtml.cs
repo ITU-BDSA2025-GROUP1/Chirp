@@ -36,7 +36,15 @@ public class UserTimelineModel : PageModel
         
         Author = author;
         CurrentPage = page;
-        Cheeps = _service.GetCheepsFromAuthor(author, page);
+         if (!string.IsNullOrWhiteSpace(CurrentAuthorName) &&
+        string.Equals(CurrentAuthorName, author, StringComparison.OrdinalIgnoreCase))
+        {
+            Cheeps = _service.GetCheepsFromAuthorAndFollowing(author, page);
+        }
+        else
+        {
+            Cheeps = _service.GetCheepsFromAuthor(author, page);
+        }
         return Page();
     }
 

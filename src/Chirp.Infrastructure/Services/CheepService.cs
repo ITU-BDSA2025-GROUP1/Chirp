@@ -39,6 +39,19 @@ public class CheepService : ICheepService
             .ToList();
     }
 
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    {
+        var items = _repo.GetCheepsFromAuthorAndFollowing(author, page, pageSize);
+        return items.Select(c => new CheepDTO(
+                c.Author.Name,
+                c.Text,
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
+            .ToList();
+    }
+
     public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
     {
         if (string.IsNullOrWhiteSpace(authorName)) return false;

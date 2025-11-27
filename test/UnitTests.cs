@@ -106,6 +106,14 @@ public class FakeCheepService : ICheepService
         };
     }
 
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    {
+        return new List<CheepDTO>
+        {
+            new CheepDTO("TestUser", "Test message from author and following", DateTime.UtcNow.ToString())
+        };
+    }
+
     public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)
     {
         return true;
