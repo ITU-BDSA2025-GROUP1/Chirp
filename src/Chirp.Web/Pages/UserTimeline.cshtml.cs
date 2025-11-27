@@ -14,6 +14,8 @@ public class UserTimelineModel : PageModel
     public int CurrentPage { get; set; }
     public string Author { get; set; }
 
+    public string? CurrentAuthorName { get; set; }
+
     public UserTimelineModel(ICheepService service, IAuthorRepository authorRepository)
     {
         _service = service;
@@ -22,6 +24,14 @@ public class UserTimelineModel : PageModel
 
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
     {
+        CurrentPage = page;
+        var email = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+            CurrentAuthorName = currentAuthor?.Name;
+        }
+
         if (page < 1) page = 1;
         
         Author = author;
@@ -61,43 +71,57 @@ public class UserTimelineModel : PageModel
     }
         public async Task<IActionResult> OnPostFollowAsync(string authorName)
     {
-        var currentUserName = User.Identity?.Name;
+          var email = User?.Identity?.Name;
         
-        if (string.IsNullOrEmpty(currentUserName))
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        if (currentAuthor == null)
         {
             return RedirectToPage("/Login");
         }
 
         try
         {
-            _authorRepository.Follow(currentUserName, authorName);
+            _authorRepository.Follow(currentAuthor.Name, authorName);
         }
         catch (InvalidOperationException ex)
         {
             // Error handling to be done here
         }
 
-        return RedirectToPage(new { author = authorName, page = CurrentPage });
+        return RedirectToPage("/UserTimeline", new { author = authorName, page = CurrentPage });
     }
 
     public async Task<IActionResult> OnPostUnfollowAsync(string authorName)
     {
-        var currentUserName = User.Identity?.Name;
+          var email = User?.Identity?.Name;
         
-        if (string.IsNullOrEmpty(currentUserName))
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        if (currentAuthor == null)
         {
             return RedirectToPage("/Login");
         }
 
         try
         {
-            _authorRepository.Unfollow(currentUserName, authorName);
+            _authorRepository.Unfollow(currentAuthor.Name, authorName);
         }
         catch (InvalidOperationException ex)
         {
             // Error handling to be done here
         }
 
-        return RedirectToPage(new { author = authorName, page = CurrentPage });
+        return RedirectToPage("/UserTimeline", new { author = authorName, page = CurrentPage });
     }
 }

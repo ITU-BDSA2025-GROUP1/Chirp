@@ -25,10 +25,9 @@
                             <a href="/@cheep.Author">@cheep.Author</a>
                         </strong>
                         
-                        @*Skal bruge noget andet end user.Identity.Name da den bruger email. Burde bruge AuthorId*@
                         @if (User.Identity?.IsAuthenticated == true && cheep.AuthorId != userId)
                         {
-                            @if (Model.IsFollowing(User.Identity.Name, cheep.Author))
+                            @if (Model.IsFollowing(Model.CurrentAuthorName, cheep.Author))
                             {
                                 <form method="post" asp-page-handler="Unfollow" style="display:inline;">
                                     <input type="hidden" name="authorName" value="@cheep.Author" />
