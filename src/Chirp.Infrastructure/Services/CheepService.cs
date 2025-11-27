@@ -19,7 +19,10 @@ public class CheepService : ICheepService
         return items.Select(c => new CheepDTO(
                 c.Author.Name,
                 c.Text,
-                FormatTs(c.Timestamp)))
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
             .ToList();
     }
 
@@ -29,7 +32,10 @@ public class CheepService : ICheepService
         return items.Select(c => new CheepDTO(
                 c.Author.Name,
                 c.Text,
-                FormatTs(c.Timestamp)))
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
             .ToList();
     }
 

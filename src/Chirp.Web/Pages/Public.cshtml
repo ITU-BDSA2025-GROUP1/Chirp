@@ -1,9 +1,14 @@
 ﻿@page "/"
 @using Chirp.Core.DTOs
+@using System.Security.Claims
 @model Chirp.Web.Pages.PublicModel
 @{
     ViewData["Title"] = "Chirp!";
     Layout = "Shared/_Layout";
+}
+@{
+    var idString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    int.TryParse(idString, out var userId);
 }
 
 <div>
@@ -21,7 +26,7 @@
                         </strong>
                         
                         @*Skal bruge noget andet end user.Identity.Name da den bruger email. Burde bruge AuthorId*@
-                        @if (User.Identity?.IsAuthenticated == true && User.Identity.Name != cheep.Author)
+                        @if (User.Identity?.IsAuthenticated == true && cheep.AuthorId != userId)
                         {
                             @if (Model.IsFollowing(User.Identity.Name, cheep.Author))
                             {
