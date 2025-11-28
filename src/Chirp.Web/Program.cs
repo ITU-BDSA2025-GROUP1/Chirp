@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Chirp.Web.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -82,8 +83,8 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 
 // GitHub OAuth registration (only enabled if config present)
-var githubClientId = builder.Configuration["authentication:github:clientId"];
-var githubClientSecret = builder.Configuration["authentication:github:clientSecret"];
+var githubClientId = builder.Configuration["authentication:github:clientId"] ?? string.Empty;
+var githubClientSecret = builder.Configuration["authentication:github:clientSecret"] ?? string.Empty;
 var githubAuthEnabled = !string.IsNullOrWhiteSpace(githubClientId) && !string.IsNullOrWhiteSpace(githubClientSecret);
 
 var authBuilder = builder.Services.AddAuthentication();
@@ -91,6 +92,7 @@ if (githubAuthEnabled)
 {
     authBuilder.AddGitHub(o =>
     {
+        // ClientId/ClientSecret are non-null (empty string if not configured) so no nullable-assignment warnings
         o.ClientId = githubClientId;
         o.ClientSecret = githubClientSecret;
         o.CallbackPath = "/signin-github";

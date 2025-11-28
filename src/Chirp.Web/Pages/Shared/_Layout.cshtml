@@ -27,7 +27,7 @@
         { 
             <div class = "navigation-links">
                 <a href = "/@displayName"> My timeline </a> 
-                <a href = "/" > Public timeline </a>
+                <a href = "/" > Public timeline </a> <!-- also known as /Public -->
                 <a href = "/About" > About me </a> <!-- name, email, following, all cheeps of user etc. -->
                 <!-- Add a logout -->
                 <a href = "/Account/Logout"> Logout </a>
@@ -51,9 +51,22 @@
         <div class="cheepbox">
             <h3>What's on your mind @displayName?</h3>
             <form method="post">
-                <input type="text" name="text" class="cheep-input" />
+                <input id="cheep-input" type="text" name="text" class="cheep-input" />
                 <button type="submit" class="cheep-btn">Share</button>
             </form>
+            <div class="text-muted" style="font-size:0.8rem" id="cheep-hint" data-testid="cheep-hint">160 characters left</div>
+            <script>
+            (function(){
+                const ta = document.getElementById('cheep-input');
+                const hint = document.getElementById('cheep-hint');
+                if(!ta || !hint) return;
+                ta.addEventListener('input', function(){
+                    const left = 160 - ta.value.length;
+                    hint.textContent = left + ' characters left';
+                    hint.style.color = left < 0 ? 'red' : '#666';
+                });
+            })();
+        </script>
         </div>
     }
     <div class=body>
