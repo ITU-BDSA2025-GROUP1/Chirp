@@ -108,4 +108,9 @@ public class FakeCheepService : ICheepService
     {
         return true;
     }
+
+    public int CountCheep(string authorName)
+    {
+        return 1;
+    }
 }
