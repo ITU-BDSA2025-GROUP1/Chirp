@@ -132,6 +132,6 @@ public class UserTimelineModel : PageModel
             // Error handling to be done here
         }
 
-        return RedirectToPage("/UserTimeline", new { author = authorName, page = CurrentPage });
+        return RedirectToPage("/UserTimeline", new { author = currentAuthor.Name, page = CurrentPage });
     }
 }

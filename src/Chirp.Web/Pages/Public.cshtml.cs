@@ -73,7 +73,7 @@ public class PublicModel : PageModel
         CurrentPage = page;
         Cheeps = _service.GetCheeps(page);
     }
-}
+
 
         public bool IsFollowing(string followerName, string followeeName)
     {
