@@ -37,7 +37,7 @@ public class CheepRepository : ICheepRepository
         return _db.Cheeps
             .AsNoTracking()
             .Include(c => c.Author)
-            .Where(c => c.Author.Name == author)
+            .Where(c => c.Author != null && c.Author.Name == author)
             .OrderByDescending(c => c.Timestamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

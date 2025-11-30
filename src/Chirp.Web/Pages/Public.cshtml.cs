@@ -9,7 +9,9 @@ public class PublicModel : PageModel
 {
     private readonly ICheepService _service;
     private readonly IAuthorRepository _authorRepository;
-    public List<CheepDTO> Cheeps { get; set; }
+
+    // keep a single property (DTOs) and initialize to avoid CS8618
+    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
 
     public string? CurrentAuthorName { get; set; }
@@ -37,20 +39,41 @@ public class PublicModel : PageModel
         return Page();
     }
     
-    public ActionResult OnPost([FromForm] string text)
+    public ActionResult OnPost([FromForm] string text, [FromQuery] int page = 1)
     {
+        // Always reload existing cheeps so we can re-render with validation errors
+        LoadCheeps(page);
+
         if (User?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(User.Identity?.Name))
         {
-            return RedirectToPage("/Public");
+            // Not authenticated: do nothing other than show reminder
+            ModelState.AddModelError("text", "You must be logged in to post a cheep.");
+            return Page();
         }
 
-        if (!string.IsNullOrWhiteSpace(text))
+        if (string.IsNullOrWhiteSpace(text))
         {
-            _service.CreateCheep(User.Identity!.Name!, text);
+            ModelState.AddModelError("text", "Cheep cannot be empty.");
+            return Page();
         }
 
-        return RedirectToPage("/Public");
+        if (text.Length > 160)
+        {
+            ModelState.AddModelError("text", "Cheep exceeds 160 characters.");
+            return Page();
+        }
+
+        _service.CreateCheep(User.Identity!.Name!, text);
+        return RedirectToPage("/Public", new { page });
     }
+
+    private void LoadCheeps(int page)
+    {
+        if (page < 1) page = 1;
+        CurrentPage = page;
+        Cheeps = _service.GetCheeps(page);
+    }
+}
 
         public bool IsFollowing(string followerName, string followeeName)
     {

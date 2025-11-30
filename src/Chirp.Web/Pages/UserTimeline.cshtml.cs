@@ -10,9 +10,11 @@ public class UserTimelineModel : PageModel
     private readonly ICheepService _service;
     private readonly IAuthorRepository _authorRepository;
 
-    public List<CheepDTO> Cheeps { get; set; }
+
+    // initialize to avoid CS8618
+    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
-    public string Author { get; set; }
+    public string Author { get; set; } = string.Empty;
 
     public string? CurrentAuthorName { get; set; }
 
@@ -33,8 +35,8 @@ public class UserTimelineModel : PageModel
         }
 
         if (page < 1) page = 1;
-        
-        Author = author;
+
+        Author = author ?? string.Empty;
         CurrentPage = page;
          if (!string.IsNullOrWhiteSpace(CurrentAuthorName) &&
         string.Equals(CurrentAuthorName, author, StringComparison.OrdinalIgnoreCase))

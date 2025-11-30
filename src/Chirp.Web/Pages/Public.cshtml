@@ -13,6 +13,42 @@
 
 <div>
     <h2> Public Timeline </h2>
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <form method="post" id="cheep-form" data-testid="cheep-form">
+            <div>
+                <label for="cheep-text">New Cheep (max 160 chars)</label><br />
+                <textarea name="text" id="cheep-text" data-testid="cheep-input" rows="3" style="width:100%" data-max="160"></textarea>
+                <div class="text-muted" style="font-size:0.8rem" id="cheep-hint" data-testid="cheep-hint">160 characters left</div>
+            </div>
+            <button type="submit" id="cheep-submit" data-testid="cheep-submit">Share</button>
+            @if (!ViewContext.ViewData.ModelState.IsValid)
+            {
+                <div class="validation-summary-errors" data-testid="cheep-error">
+                    @foreach (var error in ViewContext.ViewData.ModelState.SelectMany(kvp => kvp.Value!.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+        </form>
+        <script>
+            (function(){
+                const ta = document.getElementById('cheep-text');
+                const hint = document.getElementById('cheep-hint');
+                if(!ta || !hint) return;
+                ta.addEventListener('input', function(){
+                    const left = 160 - ta.value.length;
+                    hint.textContent = left + ' characters left';
+                    hint.style.color = left < 0 ? 'red' : '#666';
+                });
+            })();
+        </script>
+    }
+    else
+    {
+        <p data-testid="login-reminder">Log in to post a cheep.</p>
+    }
 
     @if (Model.Cheeps.Any())
     {
