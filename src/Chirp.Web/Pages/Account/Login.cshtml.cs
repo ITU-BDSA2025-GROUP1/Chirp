@@ -56,7 +56,7 @@ public class LoginModel : PageModel
             return LocalRedirect(ReturnUrl!);
         }
 
-        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+        ModelState.AddModelError(string.Empty, "There’s no user with that email or password. Please check your email and password."); // Changed from: "Invalid login attempt."
         return Page();
     }
 
