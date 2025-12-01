@@ -118,12 +118,11 @@ public class FakeCheepService : ICheepService
     {
         return true;
     }
-<<<<<<< HEAD
 
     public int CountCheep(string authorName)
     {
         return 1;
-=======
+    }
 }
 
 public class FakeAuthorRepository : IAuthorRepository
@@ -166,6 +165,5 @@ public class FakeAuthorRepository : IAuthorRepository
     public bool IsFollowing(string followerName, string followeeName)
     {
         return false;
->>>>>>> main
     }
 }
