@@ -21,6 +21,10 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
         {
             // no HasKey override for Identity primary key
             b.HasMany(a => a.Cheeps).WithOne(c => c.Author).HasForeignKey(c => c.AuthorId);
+
+            b.HasMany(a => a.Following)
+            .WithMany(a => a.Followers)
+            .UsingEntity(j => j.ToTable("AuthorFollows"));
         });
 
         modelBuilder.Entity<Cheep>(b =>

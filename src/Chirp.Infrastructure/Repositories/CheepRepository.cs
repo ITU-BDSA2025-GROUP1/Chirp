@@ -48,6 +48,30 @@ public class CheepRepository : ICheepRepository
             .ToList();
     }
 
+    public List<Cheep> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    {
+        if (string.IsNullOrWhiteSpace(author)) return new();
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 32;
+
+        var timelineOwner = _db.Authors
+            .Include(a => a.Following)
+            .SingleOrDefault(a => a.Name == author);
+
+        if (timelineOwner == null) return new();
+
+        var authorIds = timelineOwner.Following.Select(a => a.Id).Append(timelineOwner.Id).ToList();
+
+        return _db.Cheeps
+            .AsNoTracking()
+            .Include(c => c.Author)
+            .Where(c => authorIds.Contains(c.AuthorId))
+            .OrderByDescending(c => c.Timestamp)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
     public Boolean CreateCheep(Cheep cheep)
     {
         _db.Cheeps.Add(cheep);

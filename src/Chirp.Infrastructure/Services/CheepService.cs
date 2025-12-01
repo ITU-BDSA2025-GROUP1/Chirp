@@ -19,7 +19,10 @@ public class CheepService : ICheepService
         return items.Select(c => new CheepDTO(
                 c.Author?.Name ?? string.Empty,
                 c.Text,
-                FormatTs(c.Timestamp)))
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
             .ToList();
     }
 
@@ -29,7 +32,23 @@ public class CheepService : ICheepService
         return items.Select(c => new CheepDTO(
                 c.Author?.Name ?? string.Empty,
                 c.Text,
-                FormatTs(c.Timestamp)))
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
+            .ToList();
+    }
+
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    {
+        var items = _repo.GetCheepsFromAuthorAndFollowing(author, page, pageSize);
+        return items.Select(c => new CheepDTO(
+                c.Author.Name,
+                c.Text,
+                FormatTs(c.Timestamp))
+                {
+                    AuthorId = c.AuthorId
+                })
             .ToList();
     }
 

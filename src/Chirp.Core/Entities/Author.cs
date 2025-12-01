@@ -12,4 +12,10 @@ public class Author : IdentityUser<int>
     public override string? UserName { get; set; }
 
     public List<Cheep> Cheeps { get; set; } = new();
+
+    //Authors this user follows
+    public List<Author> Following { get; set; } = new();
+
+    //Authors that follow this user
+    public List<Author> Followers { get; set; } = new();
 }
