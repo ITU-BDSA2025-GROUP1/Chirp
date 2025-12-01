@@ -8,24 +8,45 @@ namespace Chirp.Web.Pages;
 public class UserTimelineModel : PageModel
 {
     private readonly ICheepService _service;
+    private readonly IAuthorRepository _authorRepository;
+
 
     // initialize to avoid CS8618
     public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
     public string Author { get; set; } = string.Empty;
 
-    public UserTimelineModel(ICheepService service)
+    public string? CurrentAuthorName { get; set; }
+
+    public UserTimelineModel(ICheepService service, IAuthorRepository authorRepository)
     {
         _service = service;
+        _authorRepository = authorRepository;
     }
 
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
     {
+        CurrentPage = page;
+        var email = User?.Identity?.Name;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+            CurrentAuthorName = currentAuthor?.Name;
+        }
+
         if (page < 1) page = 1;
 
         Author = author ?? string.Empty;
         CurrentPage = page;
-        Cheeps = _service.GetCheepsFromAuthor(Author, page);
+         if (!string.IsNullOrWhiteSpace(CurrentAuthorName) &&
+        string.Equals(CurrentAuthorName, author, StringComparison.OrdinalIgnoreCase))
+        {
+            Cheeps = _service.GetCheepsFromAuthorAndFollowing(author, page);
+        }
+        else
+        {
+            Cheeps = _service.GetCheepsFromAuthor(author, page);
+        }
         return Page();
     }
 
@@ -45,5 +66,72 @@ public class UserTimelineModel : PageModel
         }
 
         return RedirectToPage("/UserTimeline", new { author });
+    }
+
+    public bool IsFollowing(string followerName, string followeeName)
+    {
+        try
+        {
+            return _authorRepository.IsFollowing(followerName, followeeName);
+        }
+        catch (InvalidOperationException)
+        {
+            return false;
+        }
+    }
+        public async Task<IActionResult> OnPostFollowAsync(string authorName)
+    {
+          var email = User?.Identity?.Name;
+        
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        if (currentAuthor == null)
+        {
+            return RedirectToPage("/Login");
+        }
+
+        try
+        {
+            _authorRepository.Follow(currentAuthor.Name, authorName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Error handling to be done here
+        }
+
+        return RedirectToPage("/UserTimeline", new { author = authorName, page = CurrentPage });
+    }
+
+    public async Task<IActionResult> OnPostUnfollowAsync(string authorName)
+    {
+          var email = User?.Identity?.Name;
+        
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        if (currentAuthor == null)
+        {
+            return RedirectToPage("/Login");
+        }
+
+        try
+        {
+            _authorRepository.Unfollow(currentAuthor.Name, authorName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Error handling to be done here
+        }
+
+        return RedirectToPage("/UserTimeline", new { author = currentAuthor.Name, page = CurrentPage });
     }
 }

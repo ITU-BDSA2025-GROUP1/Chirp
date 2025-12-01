@@ -30,4 +30,19 @@ public class AuthorService : IAuthorService
     {
         _repo.AddAuthor(author);
     }
+
+    public void Follow(string followerName, string followeeName)
+    {
+        _repo.Follow(followerName, followeeName);
+    }
+
+    public void Unfollow(string followerName, string followeeName)
+    {
+        _repo.Unfollow(followerName, followeeName);
+    }
+
+    public bool IsFollowing(string followerName, string followeeName)
+    {
+        return _repo.IsFollowing(followerName, followeeName);
+    }
 }
