@@ -24,6 +24,8 @@ Here comes a description of our domain model.
 
 ## Architecture of deployed application
 
+![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](docs/images/Onion_Architecture.png)
+
 ## User activities
 
 ## Sequence of functionality/calls trough _Chirp!_
