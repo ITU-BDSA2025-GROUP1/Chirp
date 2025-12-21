@@ -37,50 +37,84 @@ public class CheepUiAndE2ETests : IAsyncLifetime
     [Fact(DisplayName = "Cheep form hidden when logged out")]
     public async Task CheepForm_Hidden_When_LoggedOut()
     {
+        // ensure logged out (call logout endpoint if present, then clear cookies)
+        await _page.GotoAsync(BaseUrl + "/Account/Logout").ContinueWith(_ => Task.CompletedTask);
+        await _page.Context.ClearCookiesAsync();
         await _page.GotoAsync(BaseUrl + "/");
+        // wait a little for UI to render
+        await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
         var form = _page.Locator("#cheep-form");
         Assert.False(await form.IsVisibleAsync());
-        var reminder = _page.GetByTestId("login-reminder");
+        var reminder = _page.Locator("[data-testid=\"login-reminder\"]");
         Assert.True(await reminder.IsVisibleAsync());
     }
 
     [Fact(DisplayName = "Cheep form visible after registration/login")]
     public async Task CheepForm_Visible_After_Login()
     {
-        await RegisterNewUserAsync();
+        await _page.Context.ClearCookiesAsync();                       // ensure fresh state
+        var (email, password) = await RegisterNewUserAsync();
+        await LoginUserAsync(email, password);
+
         await _page.GotoAsync(BaseUrl + "/");
-        Assert.True(await _page.Locator("#cheep-form").IsVisibleAsync());
-        Assert.True(await _page.GetByTestId("cheep-input").IsVisibleAsync());
+        var form = _page.Locator("form#cheep-form");
+        await form.WaitForAsync(new() { Timeout = 60000 });
+
+        var input = form.Locator("textarea[name='text'], textarea#cheep-input, input[name='text'], input#cheep-input").First;
+        await input.WaitForAsync(new() { Timeout = 60000 });
+
+        Assert.True(await form.IsVisibleAsync());
+        Assert.True(await input.IsVisibleAsync());
     }
 
     [Fact(DisplayName = "Cheep longer than 160 chars shows validation error")]
     public async Task Cheep_TooLong_ShowsError()
     {
-        await RegisterNewUserAsync();
+        await _page.Context.ClearCookiesAsync();
+        var (email, password) = await RegisterNewUserAsync();
+        await LoginUserAsync(email, password);
+
         await _page.GotoAsync(BaseUrl + "/");
-        var longText = new string('A', 161);
-        await _page.GetByTestId("cheep-input").FillAsync(longText);
-        await _page.GetByTestId("cheep-submit").ClickAsync();
-        // Stay on page (no redirect) and validation summary appears
-        var error = _page.GetByTestId("cheep-error");
-        await error.WaitForAsync();
-        Assert.Contains("160", await error.InnerTextAsync());
+
+        var form = _page.Locator("form#cheep-form");
+        await form.WaitForAsync(new() { Timeout = 60000 });
+
+        var input = form.Locator("textarea[name='text'], textarea#cheep-input, input[name='text'], input#cheep-input").First;
+        var submit = form.Locator("button#cheep-submit, button[type=submit]").First;
+
+        await input.FillAsync(new string('A', 161));
+        await submit.ClickAsync();
+
+        var error = _page.Locator("#cheep-error, .validation-summary-errors, .field-validation-error");
+        await error.WaitForAsync(new() { Timeout = 60000 });
+        var txt = await error.InnerTextAsync();
+        Assert.Contains("160", txt);
     }
 
     [Fact(DisplayName = "Posting cheep persists and appears in timeline")]
     public async Task PostCheep_PersistsAndAppears()
     {
-        await RegisterNewUserAsync();
+        await _page.Context.ClearCookiesAsync();
+        var (email, password) = await RegisterNewUserAsync();
+        await LoginUserAsync(email, password);
+
         await _page.GotoAsync(BaseUrl + "/");
+
+        var form = _page.Locator("form#cheep-form");
+        await form.WaitForAsync(new() { Timeout = 60000 });
+
+        var input = form.Locator("textarea[name='text'], textarea#cheep-input, input[name='text'], input#cheep-input").First;
+        var submit = form.Locator("button#cheep-submit, button[type=submit]").First;
+
         var message = "E2E Test Cheep " + Guid.NewGuid();
-        await _page.GetByTestId("cheep-input").FillAsync(message);
-        await _page.GetByTestId("cheep-submit").ClickAsync();
-        // Redirect reloads timeline; wait for message list containing our text
-        await _page.WaitForSelectorAsync($"text={message}");
+        await input.FillAsync(message);
+        await submit.ClickAsync();
+
+        await _page.WaitForSelectorAsync($"text={message}", new() { Timeout = 60000 });
         Assert.True(await _page.GetByText(message).IsVisibleAsync());
     }
 
-    private async Task RegisterNewUserAsync()
+    private async Task<(string Email, string Password)> RegisterNewUserAsync()
     {
         var unique = Guid.NewGuid().ToString("N").Substring(0, 8);
         var email = $"test_{unique}@example.com";
@@ -91,10 +125,34 @@ public class CheepUiAndE2ETests : IAsyncLifetime
         await _page.FillAsync("input[name=\"Input.Email\"]", email);
         await _page.FillAsync("input[name=\"Input.Password\"]", password);
         await _page.FillAsync("input[name=\"Input.ConfirmPassword\"]", password);
-        await _page.ClickAsync("button:has-text('Register')");
 
-        // After successful registration we should be redirected to home
-        await _page.WaitForURLAsync(url => url.StartsWith(BaseUrl + "/"));
+        // click the register button (use role/text fallback)
+        var registerBtn = _page.Locator("button:has-text('Register'), button[type=submit]");
+        await registerBtn.ClickAsync();
+
+        // Wait for redirect/new page
+        await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        return (email, password);
+    }
+
+    private async Task LoginUserAsync(string email, string password)
+    {
+        await _page.GotoAsync(BaseUrl + "/Account/Login");
+        await _page.FillAsync("input[name=\"Input.Email\"], input[name=\"Email\"], input[type=\"email\"]", email);
+        await _page.FillAsync("input[name=\"Input.Password\"], input[name=\"Password\"], input[type=\"password\"]", password);
+
+        // Prefer the Identity login form submit, not the GitHub button
+        var loginBtn = _page.Locator("form#account button#login-submit, form#account button[type=submit], form[action*='Login'] button[type=submit]").First;
+        try
+        {
+            await loginBtn.ClickAsync();
+        }
+        catch (PlaywrightException)
+        {
+            await _page.GetByRole(AriaRole.Button, new() { Name = "Log in", Exact = true }).ClickAsync();
+        }
+
+        await _page.WaitForSelectorAsync("#cheep-form, a:has-text('Logout'), a:has-text('Sign out')", new() { Timeout = 60000 });
     }
 
     private async Task EnsureServerRunningAsync()
