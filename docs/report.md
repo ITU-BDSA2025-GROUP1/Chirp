@@ -38,7 +38,46 @@ The deployment architecture follows the client - server architecture. Where the 
 
 ## How to make _Chirp!_ work locally
 
+1. Clone the repo:
+   Requirement: The project is using '.Net 8.0' and therefore required to run the program.
+   Clone the repo: 'git clone https://github.com/ITU-BDSA2025-GROUP1/Chirp.git'
+   'cd Chirp'
+
+2. Restore and build:
+   'dotnet restore
+   dotnet build'
+
+3. Configure secrets (local dev)
+   - Use dotnet user-secrets (run from the Chirp.Web project folder):
+     ''' bash
+     dotnet user-secrets init --project src/Chirp.Web/Chirp.Web.csproj
+     dotnet user-secrets set "authentication:github:clientId" "<GITHUB_CLIENT_ID>"
+     dotnet user-secrets set "authentication:github:clientSecret" "<GITHUB_CLIENT_SECRET>"
+     '''
+   - If you do not set the GitHub secrets, GitHub OAuth will be disabled (the app logs a warning) — safe for local dev.
+
+4. Run the app (HTTPS recommended)
+   - Trust dev cert:
+     'dotnet dev-certs https --trust' 
+   - Start the web app:
+     'dotnet run --project src/Chirp.Web/Chirp.Web.csproj'
+   - By default the app creates a SQLite DB file in:
+     - Local dev: {repo-root}/src/Chirp.Web/App_Data/chirp.db
+     - Azure App Service: D:\home\data\chirp.db (the app writes to HOME\data on App Service)
+   - On first run the application will apply EF migrations and seed demo data automatically (unless running in the `Testing` environment).
+
+
 ## How to run test suite locally
+
+The project contains Unit-test, integration-tests, end-to-end-tests, and UI-tests.
+- Requirements for the UI-tests
+  Install Playwright: 'playwright install'
+
+- Run tests:
+   - From repo root:
+     'dotnet test'
+   - Run only Playwright UI/E2E tests:
+     'dotnet test --filter FullyQualifiedName~CheepUiAndE2ETests'
 
 # Ethics
 
