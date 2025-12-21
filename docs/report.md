@@ -21,10 +21,10 @@ Here comes a description of our domain model.
 ![Illustration of the _Chirp!_ data model as UML class diagram.](docs/images/domain_model.png)
 
 ## Architecture — In the small
-
-## Architecture of deployed application
-
 ![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](docs/images/Onion_Architecture.png)
+## Architecture of deployed application
+![Deployed application diagram.](./images/arch_deployed_app_v2.jpg)
+The deployment architecture follows the client - server architecture. Where the Client communicates with the server through HTTPS. The server uses a SQLite database for data storage, and both are hosted on Azure. The server also has two connections with GitHub. One where a workflow is used to deploy the newest code from the "main" branch up to the server, and another by using OAuth to athenticate clients through GitHub login.
 
 ## User activities
 
