@@ -41,8 +41,8 @@ The deployment architecture follows the client - server architecture. Where the 
 
 1. Clone the repo:
    Requirement: The project is using `.Net 8.0` and therefore required to run the program.
-   Clone the repo: `git clone https://github.com/ITU-BDSA2025-GROUP1/Chirp.git`
-   `cd Chirp`
+   Clone the repo: 
+   `git clone https://github.com/ITU-BDSA2025-GROUP1/Chirp.git`
 
 2. Restore and build:
    `dotnet restore`
@@ -72,7 +72,8 @@ The deployment architecture follows the client - server architecture. Where the 
 
 The project contains Unit-test, integration-tests, end-to-end-tests, and UI-tests.
 - Requirements for the UI-tests
-  Install Playwright: `playwright install`
+  Install Playwright: 
+  `playwright install`
 
 - Run tests:
    - From repo root:
