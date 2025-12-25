@@ -7,4 +7,6 @@ public class Cheep
     public DateTime Timestamp { get; set; } // store UTC
     public int AuthorId { get; set; }
     public Author? Author { get; set; } = null!;
+
+    public List<Author> Likes { get; set; } = new();
 }

@@ -32,6 +32,21 @@ namespace Chirp.Infrastructure.Migrations
                     b.ToTable("AuthorFollows", (string)null);
                 });
 
+            modelBuilder.Entity("AuthorCheep", b =>
+                {
+                    b.Property<int>("LikedCheepsCheepId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LikesId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("LikedCheepsCheepId", "LikesId");
+
+                    b.HasIndex("LikesId");
+
+                    b.ToTable("CheepLikes", (string)null);
+                });
+
             modelBuilder.Entity("Chirp.Core.Entities.Author", b =>
                 {
                     b.Property<int>("Id")
@@ -267,6 +282,21 @@ namespace Chirp.Infrastructure.Migrations
                     b.HasOne("Chirp.Core.Entities.Author", null)
                         .WithMany()
                         .HasForeignKey("FollowingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AuthorCheep", b =>
+                {
+                    b.HasOne("Chirp.Core.Entities.Cheep", null)
+                        .WithMany()
+                        .HasForeignKey("LikedCheepsCheepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Chirp.Core.Entities.Author", null)
+                        .WithMany()
+                        .HasForeignKey("LikesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
