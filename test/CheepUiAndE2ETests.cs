@@ -27,8 +27,36 @@ public class CheepUiAndE2ETests : IAsyncLifetime
         _pw = await Playwright.CreateAsync();
         _browser = await _pw.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         _page = await _browser.NewPageAsync();
+        await EnsureDatabaseCreatedAsync();
         await EnsureServerRunningAsync();
     }
+
+    private async Task EnsureDatabaseCreatedAsync()
+{
+    var root = System.IO.Path.GetFullPath(System.IO.Path. Combine(AppContext.BaseDirectory, "../../../../"));
+    var webProj = System.IO.Path.Combine(root, "src", "Chirp.Web");
+    
+    // Run migrations to create/update database schema
+    var psi = new System.Diagnostics.ProcessStartInfo
+    {
+        FileName = "dotnet",
+        Arguments = "ef database update",
+        WorkingDirectory = webProj,
+        RedirectStandardOutput = true,
+        RedirectStandardError = true,
+        UseShellExecute = false
+    };
+    
+    using var process = System.Diagnostics.Process.Start(psi);
+    if (process != null)
+    {
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0)
+        {
+            throw new Exception($"Database migration failed with exit code {process.ExitCode}");
+        }
+    }
+}
 
     public async Task DisposeAsync()
     {
