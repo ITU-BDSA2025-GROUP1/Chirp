@@ -8,7 +8,7 @@ namespace Chirp.Web.Pages;
 public class PublicModel : PageModel
 {
     private readonly ICheepService _service;
-    private readonly IAuthorRepository _authorRepository;
+    private readonly IAuthorService _authorService;
 
     private readonly ICheepRepository _cheepRepository;
 
@@ -17,37 +17,32 @@ public class PublicModel : PageModel
     public int CurrentPage { get; set; }
 
     public string? CurrentAuthorName { get; set; }
+    public int? CurrentAuthorId { get; set; }
 
-    public PublicModel(ICheepService service, IAuthorRepository authorRepository, ICheepRepository cheepRepository)
+    public PublicModel(ICheepService service, IAuthorService authorService, ICheepRepository cheepRepository)
     {
         _service = service;
-        _authorRepository = authorRepository;
+        _authorService = authorService;
         _cheepRepository = cheepRepository;
     }
 
     public ActionResult OnGet([FromQuery] int page = 1)
     {
-        CurrentPage = page;
-        var email = User?.Identity?.Name;
-        if (!string.IsNullOrWhiteSpace(email))
-        {
-            var currentAuthor = _authorRepository.GetAuthorByEmail(email);
-            CurrentAuthorName = currentAuthor?.Name;
-        }
-
+        var currentAuthor = ResolveCurrentAuthor();
         if (page < 1) page = 1;
 
         CurrentPage = page;
-        Cheeps = _service.GetCheeps(page);
+        Cheeps = _service.GetCheeps(page, viewerId: currentAuthor?.Id);
         return Page();
     }
     
     public ActionResult OnPost([FromForm] string text, [FromQuery] int page = 1)
     {
         // Always reload existing cheeps so we can re-render with validation errors
-        LoadCheeps(page);
+        var currentAuthor = ResolveCurrentAuthor();
+        LoadCheeps(page, currentAuthor?.Id);
 
-        if (User?.Identity?.IsAuthenticated != true || string.IsNullOrWhiteSpace(User.Identity?.Name))
+        if (currentAuthor == null)
         {
             // Not authenticated: do nothing other than show reminder
             ModelState.AddModelError("text", "You must be logged in to post a cheep.");
@@ -70,36 +65,32 @@ public class PublicModel : PageModel
         return RedirectToPage("/Public", new { page });
     }
 
-    private void LoadCheeps(int page)
+    private void LoadCheeps(int page, int? viewerId)
     {
         if (page < 1) page = 1;
         CurrentPage = page;
-        Cheeps = _service.GetCheeps(page);
+        Cheeps = _service.GetCheeps(page, viewerId: viewerId);
     }
 
 
-        public bool IsFollowing(string followerName, string followeeName)
+    public bool IsFollowing(string? followerName, string followeeName)
     {
+        if (string.IsNullOrWhiteSpace(followerName) || string.IsNullOrWhiteSpace(followeeName))
+        {
+            return false;
+        }
         try
         {
-            return _authorRepository.IsFollowing(followerName, followeeName);
+            return _authorService.IsFollowing(followerName, followeeName);
         }
         catch (InvalidOperationException)
         {
             return false;
         }
     }
-        public async Task<IActionResult> OnPostFollowAsync(string authorName)
+    public IActionResult OnPostFollow(string authorName)
     {
-        var email = User?.Identity?.Name;
-        
-        
-        if (string.IsNullOrEmpty(email))
-        {
-            return RedirectToPage("/Login");
-        }
-
-        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        var currentAuthor = ResolveCurrentAuthor();
         if (currentAuthor == null)
         {
             return RedirectToPage("/Login");
@@ -107,9 +98,9 @@ public class PublicModel : PageModel
 
         try
         {
-            _authorRepository.Follow(currentAuthor.Name, authorName);
+            _authorService.Follow(currentAuthor.Name, authorName);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             // Error handling to be done here
         }
@@ -117,17 +108,9 @@ public class PublicModel : PageModel
         return RedirectToPage("/Public", new { author = authorName, page = CurrentPage });
     }
 
-    public async Task<IActionResult> OnPostUnfollowAsync(string authorName)
+    public IActionResult OnPostUnfollow(string authorName)
     {
-          var email = User?.Identity?.Name;
-        
-        
-        if (string.IsNullOrEmpty(email))
-        {
-            return RedirectToPage("/Login");
-        }
-
-        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        var currentAuthor = ResolveCurrentAuthor();
         if (currentAuthor == null)
         {
             return RedirectToPage("/Login");
@@ -135,9 +118,9 @@ public class PublicModel : PageModel
 
         try
         {
-            _authorRepository.Unfollow(currentAuthor.Name, authorName);
+            _authorService.Unfollow(currentAuthor.Name, authorName);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             // Error handling to be done here
         }
@@ -145,17 +128,9 @@ public class PublicModel : PageModel
         return RedirectToPage("/Public", new { author = authorName, page = CurrentPage });
     }
 
-    public async Task<IActionResult> OnPostLikeAsync(int cheepId)
+    public IActionResult OnPostLike(int cheepId)
     {
-        var email = User?.Identity?.Name;
-        
-        
-        if (string.IsNullOrEmpty(email))
-        {
-            return RedirectToPage("/Login");
-        }
-
-        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        var currentAuthor = ResolveCurrentAuthor();
         if (currentAuthor == null)
         {
             return RedirectToPage("/Login");
@@ -165,12 +140,28 @@ public class PublicModel : PageModel
         {
             _cheepRepository.LikeCheep(cheepId, currentAuthor.Id);
         }
-        catch (InvalidOperationException ex)
+        catch (InvalidOperationException)
         {
             // Error handling to be done here
         }
 
         return RedirectToPage("/Public", new { page = CurrentPage });
+    }
+
+    private AuthorDTO? ResolveCurrentAuthor()
+    {
+        var email = User?.Identity?.Name;
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            CurrentAuthorName = null;
+            CurrentAuthorId = null;
+            return null;
+        }
+
+        var currentAuthor = _authorService.GetAuthorByEmail(email);
+        CurrentAuthorName = currentAuthor?.Name;
+        CurrentAuthorId = currentAuthor?.Id;
+        return currentAuthor;
     }
 }
 

@@ -22,10 +22,10 @@ public class CheepRepository : ICheepRepository
         return _db.Cheeps
             .AsNoTracking()
             .Include(c => c.Author)
+            .Include(c => c.Likes)
             .OrderByDescending(c => c.Timestamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
-            .Include(c => c.Likes)
             .ToList();
     }
 
@@ -38,6 +38,7 @@ public class CheepRepository : ICheepRepository
         return _db.Cheeps
             .AsNoTracking()
             .Include(c => c.Author)
+            .Include(c => c.Likes)
             .Where(c => c.Author != null && c.Author.Name == author)
             .OrderByDescending(c => c.Timestamp)
             .Skip((page - 1) * pageSize)
@@ -62,6 +63,7 @@ public class CheepRepository : ICheepRepository
         return _db.Cheeps
             .AsNoTracking()
             .Include(c => c.Author)
+            .Include(c => c.Likes)
             .Where(c => authorIds.Contains(c.AuthorId))
             .OrderByDescending(c => c.Timestamp)
             .Skip((page - 1) * pageSize)
