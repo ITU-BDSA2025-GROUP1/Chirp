@@ -18,10 +18,12 @@ namespace Chirp.E2E;
 public class End2EndTests
 {
     private readonly HttpClient _client;
+    private readonly WebAppFactory _factory;
     private readonly ITestOutputHelper _output;
 
     public End2EndTests(WebAppFactory factory, ITestOutputHelper output)
     {
+        _factory = factory;
         _client = factory.CreateClient();
         _output = output;
     }
@@ -37,15 +39,18 @@ public class End2EndTests
         html.Should().Contain("Hello, BDSA students!");
     }
 
-    [Fact(DisplayName = "Adrian's timeline HTML contains Adrian's cheep")]
-    public async Task AdrianTimeline_HtmlContainsAdrianCheep()
+    [Fact(DisplayName = "Adrian's timeline redirects to login when anonymous")]
+    public async Task AdrianTimeline_RequiresLogin()
     {
-        var resp = await _client.GetAsync("/Adrian");
-        resp.StatusCode.Should().Be(HttpStatusCode.OK);
+        var authClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
 
-        var html = await resp.Content.ReadAsStringAsync();
-        html.Should().Contain("Adrian");
-        html.Should().Contain("Hej, velkommen til kurset.");
+        var resp = await authClient.GetAsync("/Adrian");
+        resp.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        resp.Headers.Location.Should().NotBeNull();
+        resp.Headers.Location!.OriginalString.Should().Contain("/Account/Login");
     }
 
     [Fact(DisplayName = "Public timeline returns OK and HTML content")]
@@ -62,13 +67,18 @@ public class End2EndTests
         html.Should().Contain("Chirp!");
     }
 
-    [Fact(DisplayName = "User timeline with pagination works")]
-    public async Task UserTimeline_WithPagination()
+    [Fact(DisplayName = "User timeline redirects to login when anonymous")]
+    public async Task UserTimeline_RequiresLogin()
     {
-        var resp = await _client.GetAsync("/Helge?page=1");
-        
-        resp.StatusCode.Should().Be(HttpStatusCode.OK);
-        var html = await resp.Content.ReadAsStringAsync();
-        html.Should().Contain("Helge");
+        var authClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var resp = await authClient.GetAsync("/Helge?page=1");
+
+        resp.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        resp.Headers.Location.Should().NotBeNull();
+        resp.Headers.Location!.OriginalString.Should().Contain("/Account/Login");
     }
 }

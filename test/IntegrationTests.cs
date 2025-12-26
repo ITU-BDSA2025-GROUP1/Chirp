@@ -12,9 +12,11 @@ namespace Chirp.IntegratedTests;
 public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient _client;
+    private readonly WebApplicationFactory<Program> _factory;
 
     public IntegrationTests(WebApplicationFactory<Program> factory)
     {
+        _factory = factory;
         _client = factory.CreateClient();
     }
 
@@ -29,12 +31,18 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetUserTimeline_ReturnsSuccess()
+    public async Task GetUserTimeline_RequiresAuthentication()
     {
-        // Act
-        var response = await _client.GetAsync("/Helge");
+        var authClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var response = await authClient.GetAsync("/Helge");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location.Should().NotBeNull();
+        response.Headers.Location!.OriginalString.Should().Contain("/Account/Login");
     }
 }

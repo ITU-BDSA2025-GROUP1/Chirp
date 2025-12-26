@@ -9,6 +9,8 @@ public interface IAuthorService
 
     AuthorDTO? GetAuthorByEmail(string email);
 
+    AuthorProfileDTO? GetProfileByName(string name);
+
     void AddAuthor(Author author);
 
     //Methods for follow/unfollow
