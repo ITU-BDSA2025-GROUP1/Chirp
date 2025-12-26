@@ -828,8 +828,6 @@ span[asp-validation-for] {
     display: inline-block;
     text-decoration: none;
     text-align: center;
-    line-height: 1.5;
-    box-sizing: border-box;
 }
 
 .body button[type="submit"]:not(#cheep-submit):not(.cheeps button):hover,
@@ -859,6 +857,7 @@ span[asp-validation-for] {
 .btn-secondary {
     background: var(--medium-gray);
     color: var(--text-dark);
+    border: 2px solid var(--border-color);
 }
 
 .btn-secondary:hover {
@@ -911,17 +910,8 @@ span[asp-validation-for] {
 }
 
 /* Button groups (for logout page) */
-.body .button-group {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    align-items: center;
-    margin-top: 24px;
-}
-
-.body .button-group .btn {
-    flex: 0 1 180px;
-    min-width: 180px;
+.body form .btn + .btn {
+    margin-left: 12px;
 }
 
 /* ============================================
