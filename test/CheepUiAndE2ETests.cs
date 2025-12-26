@@ -12,8 +12,15 @@ public class CheepUiAndE2ETests : IAsyncLifetime
     private IPage _page = null!;
     private System.Diagnostics.Process? _serverProcess;
 
-    // Adjust if your dev server runs on a different port
-    private const string BaseUrl = "http://localhost:5273";
+    private static string GetFreeUrl()
+{
+    var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+    listener.Start();
+    int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+    listener.Stop();
+    return $"http://localhost:{port}";
+}
+    private string BaseUrl = GetFreeUrl();
 
     public async Task InitializeAsync()
     {

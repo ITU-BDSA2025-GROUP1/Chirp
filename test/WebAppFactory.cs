@@ -50,7 +50,7 @@ public class WebAppFactory : WebApplicationFactory<global::Program>
             var db = scope.ServiceProvider.GetRequiredService<ChirpDbContext>();
 
             // Ensure schema is created safely
-            db.Database.EnsureCreated();
+            db.Database.Migrate();
 
             // Seed the DB
             //"comment"

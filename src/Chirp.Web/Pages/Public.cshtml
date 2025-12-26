@@ -55,7 +55,7 @@
         <ul id="messagelist" class="cheeps">
             @foreach (var cheep in Model.Cheeps)
             {
-                <li>
+                <li> 
                     <p>
                         <strong>
                             <a href="/@cheep.Author">@cheep.Author</a>
@@ -65,20 +65,48 @@
                         {
                             @if (Model.IsFollowing(Model.CurrentAuthorName, cheep.Author))
                             {
-                                <form method="post" asp-page-handler="Unfollow" style="display:inline;">
+                                <form method="post" asp-page-handler="Unfollow" 
+                                    
+                                    style="display:inline;">
                                     <input type="hidden" name="authorName" value="@cheep.Author" />
                                     <button type="submit">Unfollow</button>
                                 </form>
                             }
                             else
                             {
-                                <form method="post" asp-page-handler="Follow" style="display:inline;">
+                                <form method="post" asp-page-handler="Follow" 
+                                    
+                                    style="display:inline;">
                                     <input type="hidden" name="authorName" value="@cheep.Author" />
                                     <button type="submit">Follow</button>
                                 </form>
                             }
                         }
                     </p>
+ <p>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <form method="post" asp-page-handler="Like">
+            <input type="hidden" name="cheepId" value="@cheep.CheepId" />
+            <button type="submit" class="like-btn">
+                @if (cheep.LikedByCurrentUser)
+                {
+                    <span>❤️ @cheep.LikeCount</span>
+                }
+                else
+                {
+                    <span>🤍 @cheep.LikeCount</span>
+                }
+            </button>
+        </form>
+    }
+    else
+    {
+        <!-- Not logged in: show likes only -->
+        <span>❤️ @cheep.LikeCount</span>
+    }
+</p>
+
                     <p>
                         @cheep.Message
                         <small>&mdash; @cheep.Timestamp</small>
@@ -100,4 +128,23 @@
     {
         <em>There are no cheeps so far.</em>
     }
+
+    <script>
+  (function () {
+    // Restore scroll after reload
+    const y = sessionStorage.getItem("scrollY");
+    if (y !== null) {
+      window.scrollTo(0, parseInt(y, 10));
+      sessionStorage.removeItem("scrollY");
+    }
+
+    // Save scroll before any postback form submit
+    document.addEventListener("submit", function (e) {
+      const form = e.target;
+      if (form && form.method && form.method.toLowerCase() === "post") {
+        sessionStorage.setItem("scrollY", String(window.scrollY));
+      }
+    }, true);
+  })();
+</script>
 </div>

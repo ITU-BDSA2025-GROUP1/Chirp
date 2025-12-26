@@ -25,6 +25,7 @@ public class CheepRepository : ICheepRepository
             .OrderByDescending(c => c.Timestamp)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .Include(c => c.Likes)
             .ToList();
     }
 
@@ -104,6 +105,34 @@ public class CheepRepository : ICheepRepository
         _db.Cheeps.Add(cheep);
         return _db.SaveChanges() > 0;
 
+    }
+
+    public bool LikeCheep(int cheepId, int authorId)
+{
+    var cheep = _db.Cheeps.Include(c => c.Likes).SingleOrDefault(c => c.CheepId == cheepId);
+    var author = _db.Authors.SingleOrDefault(a => a.Id == authorId);
+
+    if (cheep == null || author == null) return false;
+
+    if (cheep.Likes.Any(a => a.Id == authorId))
+        cheep.Likes.Remove(author); //Unlike
+    else
+        cheep.Likes.Add(author); // Like
+
+    return _db.SaveChanges() > 0;
+}
+
+
+    public bool IsLiked(int cheepId, int authorId)
+    {
+        var cheep = _db.Cheeps
+            .Include(c => c.Likes)
+            .SingleOrDefault(c => c.CheepId == cheepId);
+
+        if (cheep == null)
+            return false;
+
+        return cheep.Likes.Any(a => a.Id == authorId);
     }
 
 }

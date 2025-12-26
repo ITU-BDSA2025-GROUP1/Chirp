@@ -10,16 +10,19 @@ public class PublicModel : PageModel
     private readonly ICheepService _service;
     private readonly IAuthorRepository _authorRepository;
 
+    private readonly ICheepRepository _cheepRepository;
+
     // keep a single property (DTOs) and initialize to avoid CS8618
     public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
     public int CurrentPage { get; set; }
 
     public string? CurrentAuthorName { get; set; }
 
-    public PublicModel(ICheepService service, IAuthorRepository authorRepository)
+    public PublicModel(ICheepService service, IAuthorRepository authorRepository, ICheepRepository cheepRepository)
     {
         _service = service;
         _authorRepository = authorRepository;
+        _cheepRepository = cheepRepository;
     }
 
     public ActionResult OnGet([FromQuery] int page = 1)
@@ -140,6 +143,34 @@ public class PublicModel : PageModel
         }
 
         return RedirectToPage("/Public", new { author = authorName, page = CurrentPage });
+    }
+
+    public async Task<IActionResult> OnPostLikeAsync(int cheepId)
+    {
+        var email = User?.Identity?.Name;
+        
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return RedirectToPage("/Login");
+        }
+
+        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
+        if (currentAuthor == null)
+        {
+            return RedirectToPage("/Login");
+        }
+
+        try
+        {
+            _cheepRepository.LikeCheep(cheepId, currentAuthor.Id);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Error handling to be done here
+        }
+
+        return RedirectToPage("/Public", new { page = CurrentPage });
     }
 }
 

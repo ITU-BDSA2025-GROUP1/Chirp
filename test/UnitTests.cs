@@ -93,12 +93,12 @@ public class UnitTests
 // Fake implementation of ICheepService for testing purposes
 public class FakeCheepService : ICheepService
 {
-    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>();
     }
 
-    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>
         {
@@ -106,7 +106,7 @@ public class FakeCheepService : ICheepService
         };
     }
 
-    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>
         {
