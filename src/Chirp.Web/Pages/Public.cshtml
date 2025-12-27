@@ -61,7 +61,7 @@
             @foreach (var cheep in Model.Cheeps)
             {
                 <li class="fade-in"> 
-                    <p>
+                    <div class="cheep-header">
                         <strong>
                             <a href="/@cheep.Author">@cheep.Author</a>
                         </strong>
@@ -87,7 +87,7 @@
                                 </form>
                             }
                         }
-                    </p>
+                    </div>
  <p>
     @if (isAuthenticated)
     {
