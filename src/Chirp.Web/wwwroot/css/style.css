@@ -479,6 +479,7 @@ body {
     cursor: pointer;
     font-size: 1rem;
     transition: transform var(--transition-fast);
+    color: var(--text-dark);
 }
 
 .like-btn:hover {
@@ -550,10 +551,12 @@ body {
 
 .follow-toggle-form {
     margin-top: 16px;
+    display: flex;
+    justify-content: center;
 }
 
 .follow-btn {
-    padding: 10px 24px;
+    padding: 12px 20px;
     background: var(--primary-blue);
     color: var(--white);
     border: 1px solid var(--primary-blue);
@@ -561,6 +564,8 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-normal);
+    min-width: 140px;
+    text-align: center;
 }
 
 .follow-btn:hover {
@@ -960,7 +965,6 @@ input[type="submit"] {
     text-decoration: none;
     text-align: center;
     font-family: inherit;
-    line-height: 1;
     vertical-align: middle;
 }
 
@@ -1060,6 +1064,14 @@ input[type="submit"]:active {
 .body .button-group .btn {
     min-width: 180px;
     flex: 0 1 180px;
+    line-height: 1;
+}
+
+/*register button */
+.register-button-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }
 
 /* ============================================
