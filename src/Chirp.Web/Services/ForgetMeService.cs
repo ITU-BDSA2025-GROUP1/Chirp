@@ -42,8 +42,9 @@ public sealed class ForgetMeService : IForgetMeService
         user.LikedCheeps.Clear();
 
         user.Name = PlaceholderName;
-        user.Email = null;
-        user.NormalizedEmail = null;
+        var placeholderEmail = BuildPlaceholderEmail(user.Id);
+        user.Email = placeholderEmail;
+        user.NormalizedEmail = placeholderEmail.ToUpperInvariant();
         user.PhoneNumber = null;
         user.PhoneNumberConfirmed = false;
         user.EmailConfirmed = false;
@@ -86,6 +87,9 @@ public sealed class ForgetMeService : IForgetMeService
         var value = $"deleted-user-{userId}-{Guid.NewGuid():N}";
         return value.Length <= 256 ? value : value[..256];
     }
+
+    private static string BuildPlaceholderEmail(int userId)
+        => $"deleted-user-{userId}-{Guid.NewGuid():N}@chirp.local";
 
     private async Task LoadNavigationCollectionsAsync(Author user, CancellationToken cancellationToken)
     {
