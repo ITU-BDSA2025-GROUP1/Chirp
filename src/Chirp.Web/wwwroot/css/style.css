@@ -1,462 +1,1095 @@
+/* ============================================
+   CHIRP - Modern Scandinavian Design
+   ============================================ */
+
+/* CSS Variables for easy theming */
+:root {
+    --primary-blue: #2c5f8d;
+    --primary-blue-hover: #1e4563;
+    --accent-blue: #4a90c9;
+    --light-gray: #f5f7fa;
+    --medium-gray: #e1e8ed;
+    --text-dark: #1a1a2e;
+    --text-muted: #6b7280;
+    --border-color: #d1d5db;
+    --white: #ffffff;
+    --error-red: #dc2626;
+    --success-green: #059669;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+}
+
+/* ============================================
+   RESET & BASE STYLES
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-  background: #eccaca;
-  font-family: 'Trebuchet MS', sans-serif;
-  font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    color: var(--text-dark);
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: #26776F;
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+
+.page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
 }
 
-a:hover {
-  color: #333;
+/* ============================================
+   HEADER
+   ============================================ */
+
+.page h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 40px 0 30px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    letter-spacing: -0.02em;
 }
 
-input[type="email"],
-input[type="text"],
-input[type="tel"],
-input[type="password"] {
-    background: white;
-    border: 1px solid #e6c0bf;
-    padding: 2px;
-    font-family: 'Trebuchet MS', sans-serif;
-    font-size: 14px;
-    border-radius: 2px;
-    -moz-border-radius: 2px;
-    -webkit-border-radius: 2px;
-    color: #571010;
+.page h1 img {
+    width: 48px;
+    height: 48px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
-input[type="submit"] {
-  background: #571010;
-  border: 1px solid #3b0707;
-  padding: 1px 3px;
-  font-family: 'Trebuchet MS', sans-serif;
-  font-size: 14px;
-  font-weight: bold;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  color: white;
-}
-
-div.page {
-  background: white;
-  border: 1px solid #cc6e6e;
-  width: 700px;
-  margin: 30px auto;
-}
-
-div.page > h1 {
-  background: #cc6e6e;
-  margin: 0;
-  padding: 10px 14px;
-  color: white;
-  letter-spacing: 1px;
-  text-shadow: 0 0 3px #772424;
-  font-weight: normal;
-  font-size: 80px;
-}
-
-div.page h1 img {
-  height: 1em;
-}
+/* ============================================
+   NAVIGATION
+   ============================================ */
 
 .navigation {
-  background: #DEE9E8;
-  padding: 4px 10px;
-  border-top: 1px solid #ccc;
-  border-bottom: 1px solid #eee;
-  color: #888;
-  font-size: 12px;
-  letter-spacing: 0.5px;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
 }
 
-.navigation .navigation-links {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
+.navigation-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
-.navigation a, .navigation form button {
-  display: inline-block;
-  padding: 6px 12px;
-  background: #571010;
-  color: #ffffff;
-  border: 1px solid #3b0707;
-  border-radius: 4px;
-  text-decoration: none;
-  cursor: pointer;
-  font: inherit;
+.navigation-links a,
+.navigation-links form button {
+    padding: 10px 20px;
+    color: var(--text-dark);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
 }
 
-.navigation a:hover, .navigation form button:hover {
-  background: #6b1616;
+.navigation-links a::before,
+.navigation-links form button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--primary-blue);
+    transition: all var(--transition-normal);
+    transform: translateX(-50%);
+}
+
+.navigation-links a:hover,
+.navigation-links form button:hover {
+    background: var(--light-gray);
+    color: var(--primary-blue);
+}
+
+.navigation-links a:hover::before,
+.navigation-links form button:hover::before {
+    width: 80%;
 }
 
 .navigation form {
     display: contents;
 }
 
-div.page h2 {
-  margin: 0 0 15px 0;
-  color: #571010;
-  text-shadow: 0 1px 2px #ccc;
+/* ============================================
+   CHEEP INPUT BOX (Layout)
+   ============================================ */
+
+.cheepbox {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-div.page div.body {
-  padding: 10px;
+.cheepbox h3 {
+    color: var(--white);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
 }
-
-div.page div.footer {
-  background: #eee;
-  color: #888;
-  padding: 5px 10px;
-  font-size: 12px;
-}
-
-div.page div.followstatus {
-  border: 1px solid #ccc;
-  background: #E3EBEA;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  padding: 3px;
-  font-size: 13px;
-}
-
-div.page ul.cheeps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-div.page ul.cheeps li {
-  margin: 10px 0;
-  padding: 5px;
-  background: #F0FAF9;
-  border: 1px solid #DBF3F1;
-  border-radius: 2px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  min-height: 48px;
-}
-
-div.page ul.cheeps p {
-  margin: 0;
-}
-
-div.page ul.cheeps li img {
-  float: left;
-  padding: 0 10px 0 0;
-}
-
-div.page ul.cheeps li small {
-  font-size: 0.9em;
-  color: #888;
-}
-
-div.page div.cheepbox {
-  margin: 10px 0;
-  padding: 5px;
-  background: #F0FAF9;
-  border: 1px solid #e29494;
-  border-radius: 2px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-}
-
-div.page div.cheepbox h3 {
-  margin: 0;
-  font-size: 1em;
-  color: #7e2c2c;
-}
-
-div.page div.cheepbox p {
-  margin: 0;
-}
-
-div.page div.cheepbox input[type="text"] {
-  width: 585px;
-}
-
-div.page div.cheepbox input[type="submit"] {
-  width: 70px;
-  margin-left: 5px;
-}
-
-div.message {
-  list-style: none;
-  margin: 10px 10px 0 10px;
-
-  background: #f3b9b9;
-  border: 1px solid #ce8181;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  padding: 4px;
-  font-size: 13px;
-}
-
-ul.message li {
-  background: #f3b9b9;
-  border: 1px solid #ce8181;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  padding: 4px;
-  font-size: 13px;
-}
-
-div.error {
-  margin: 10px 0;
-  background: #FAE4E4;
-  border: 1px solid #DD6F6F;
-  border-radius: 2px;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
-  padding: 4px;
-  font-size: 13px;
-}
-
-div.topics {
-  width: 180px;
-  height: 250px;
-  background: #ffffff;
-  border: 1px solid #e29494;
-  border-radius: 2px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin-left: 460px;
-  padding: 10px;
-}
-
-ul.topic {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-li.topic {
-  margin: 10px 0;
-  padding: 5px;
-  background: #F0FAF9;
-  border: 1px solid #DBF3F1;
-  border-radius: 2px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  min-height: 20px;
-}
-
-form * {
-    margin: 2px 0;
-}
-
-.auth-form {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-width: 360px;
-}
-
-.auth-form .form-field {
-    display: flex;
-    flex-direction: column;
-}
-
-.auth-form label {
-    font-weight: bold;
-    color: #571010;
-    margin-bottom: 2px;
-}
-
-.auth-form label::after {
-    content: ":";
-    margin-left : 2px;
-}
-
-.auth-form span {
-    font-size: 12px;
-    color: #8b4949;
-    min-height: 14px;
-}
-
-.auth-form .form-hint {
-    color: #7a6969;
-    font-size: 12px;
-    font-style: italic;
-    margin-bottom: 2px;
-}
-
-.auth-form button {
-    align-self: flex-start;
-}
-
-button {
-    background-color: #cc6e6e;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #8b4949;
-}
-
-.user-info-page {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.user-info-header {
-  background: #fdf1f1;
-  border: 1px solid #e29494;
-  border-radius: 6px;
-  padding: 16px;
-}
-
-.user-info-header h2 {
-  margin-bottom: 6px;
-}
-
-.user-email {
-  margin: 0;
-  color: #7a3f3f;
-}
-
-.user-stats {
-  display: flex;
-  gap: 16px;
-  margin-top: 8px;
-  font-size: 0.95rem;
-}
-
-.follow-toggle-form {
-  margin-top: 12px;
-}
-
-.follow-btn {
-  background: #571010;
-  border: 1px solid #3b0707;
-  border-radius: 4px;
-}
-
-.user-following {
-  background: #fef7f7;
-  border: 1px solid #f4c4c4;
-  border-radius: 6px;
-  padding: 12px 16px;
-}
-
-.following-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.following-list li {
-  background: #F0FAF9;
-  border: 1px solid #DBF3F1;
-  border-radius: 16px;
-  padding: 4px 10px;
-}
-
-.muted {
-  color: #7a6969;
-  font-style: italic;
-}
-
-.user-cheeps .cheep-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 4px;
-}
-
-.cheep-meta {
-  display: flex;
-  justify-content: flex-end;
-  font-size: 0.9em;
-  color: #7a3f3f;
-}
-
-.cheep-likes {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.follow-hint {
-  margin-top: 12px;
-  color: #7a6969;
-  font-style: italic;
-}
-
-ul.nav {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #cc6e6e;
-}
-
-ul.nav li {
-    float: left;
-}
-
-ul.nav li a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 8px 8px;
-    text-decoration: none;
-}
-
-ul.nav li a:hover {
-    background-color: #8b4949;
-}
-
-.cheepbox textarea {
-   width: 100%; 
-   padding: 6px; 
-   margin-bottom: 6px; 
-   font: inherit; 
-  }
 
 .cheepbox form {
     display: flex;
-    gap: 8px;
+    gap: 12px;
     align-items: center;
 }
 
-.cheepbox .cheep-input {
+.cheepbox .cheep-input,
+.cheepbox textarea {
     flex: 1;
-    max-width: 420px;
-    padding: 6px;
-    font: inherit;
-    border: 1px solid #ce8181;
-    border-radius: 4px;
+    padding: 12px 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    transition: all var(--transition-normal);
+    font-family: inherit;
+    resize: vertical;
+}
+
+.cheepbox .cheep-input:focus,
+.cheepbox textarea:focus {
+    outline: none;
+    border-color: var(--white);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
 }
 
 .cheepbox .cheep-btn {
-   background:#571010; 
-   color:#fff; 
-   border:1px solid #3b0707; 
-   padding:6px 14px; 
-   border-radius:4px; 
-   cursor:pointer; 
-  }
+    padding: 12px 28px;
+    background: var(--white);
+    color: var(--primary-blue);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    white-space: nowrap;
+}
 
-.cheepbox .cheep-btn:hover { 
-  background:#6b1616; 
+.cheepbox .cheep-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.cheepbox .cheep-btn:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   MAIN CONTENT AREA
+   ============================================ */
+
+.body {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.body h2 {
+    font-size: 1.75rem;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* ============================================
+   CHEEP FORM (in body)
+   ============================================ */
+
+#cheep-form {
+    background: var(--light-gray);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 32px;
+    border: 1px solid var(--border-color);
+}
+
+#cheep-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+#cheep-text {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    resize: vertical;
+    transition: all var(--transition-normal);
+    background: var(--white);
+}
+
+#cheep-text:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(44, 95, 141, 0.1);
+}
+
+#cheep-hint {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+#cheep-submit {
+    margin-top: 12px;
+    padding: 12px 32px;
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+#cheep-submit:hover {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+#cheep-submit:active {
+    transform: translateY(0);
+}
+
+/* Login reminder */
+.body p[data-testid="login-reminder"] {
+    background: var(--light-gray);
+    padding: 16px 20px;
+    border-radius: 8px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    border-left: 4px solid var(--accent-blue);
+}
+
+/* Validation errors */
+.validation-summary-errors {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--error-red);
+    color: var(--error-red);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.validation-summary-errors div {
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   CHEEPS LIST
+   ============================================ */
+
+.cheeps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cheeps li {
+    padding: 20px;
+    margin-bottom: 16px;
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    transition: all var(--transition-normal);
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.cheeps li.fade-in {
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stagger animation for list items */
+.cheeps li:nth-child(1) { animation-delay: 0.05s; }
+.cheeps li:nth-child(2) { animation-delay: 0.1s; }
+.cheeps li:nth-child(3) { animation-delay: 0.15s; }
+.cheeps li:nth-child(4) { animation-delay: 0.2s; }
+.cheeps li:nth-child(5) { animation-delay: 0.25s; }
+.cheeps li:nth-child(n+6) { animation-delay: 0.3s; }
+
+.cheeps li:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--primary-blue);
+}
+
+.cheeps li {
+    position: relative;
+}
+
+.cheeps li .cheep-header {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cheeps li .cheep-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.cheeps li .cheep-author a,
+.cheeps li strong a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    position: relative;
+    transition: color var(--transition-fast);
+}
+
+.cheeps li .cheep-author a::after,
+.cheeps li strong a::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-blue);
+    transition: width var(--transition-normal);
+}
+
+.cheeps li .cheep-author a:hover,
+.cheeps li strong a:hover {
+    color: var(--accent-blue);
+}
+
+.cheeps li .cheep-author a:hover::after,
+.cheeps li strong a:hover::after {
+    width: 100%;
+}
+
+/* Follow/Unfollow buttons in cheeps */
+.cheeps li .follow-btn-container {
+    flex-shrink: 0;
+}
+
+.cheeps li .follow-btn-container form {
+    display: inline;
+}
+
+.cheeps li .follow-btn-container button,
+.cheeps li form[style*="display:inline"] button {
+    padding: 6px 16px;
+    background: var(--light-gray);
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cheeps li form[style*="display:inline"] button:hover {
+    background: var(--medium-gray);
+    border-color: var(--primary-blue);
+}
+
+/* Like button styling */
+.like-btn {
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px !important;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform var(--transition-fast);
+}
+
+.like-btn:hover {
+    transform: scale(1.1);
+    background: transparent !important;
+}
+
+.like-btn span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cheeps li small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-left: 8px;
+}
+
+/* Empty state */
+.body > em {
+    display: block;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    font-style: normal;
+}
+
+/* ============================================
+   USER INFO PAGES
+   ============================================ */
+
+.user-info-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.user-info-header {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-info-header h2 {
+    margin-bottom: 8px;
+    color: var(--text-dark);
+}
+
+.user-email {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.user-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    font-size: 0.95rem;
+}
+
+.user-stats strong {
+    color: var(--primary-blue);
+}
+
+.follow-toggle-form {
+    margin-top: 16px;
+}
+
+.follow-btn {
+    padding: 10px 24px;
+    background: var(--primary-blue);
+    color: var(--white);
+    border: 1px solid var(--primary-blue);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.follow-btn:hover {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.user-following {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-following h3 {
+    margin-bottom: 12px;
+    color: var(--text-dark);
+}
+
+.following-list {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.following-list li {
+    background: var(--light-gray);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 6px 14px;
+    transition: all var(--transition-fast);
+}
+
+.following-list li:hover {
+    background: var(--medium-gray);
+    transform: translateY(-2px);
+}
+
+.following-list li a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.muted {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.user-cheeps {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.user-cheeps h3 {
+    margin-bottom: 20px;
+    color: var(--text-dark);
+}
+
+.user-cheeps .cheep-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.cheep-meta {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-top: 8px;
+}
+
+.cheep-likes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cheep-timestamp {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.follow-hint {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid var(--border-color);
+}
+
+.pagination a {
+    padding: 10px 20px;
+    background: var(--primary-blue);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all var(--transition-normal);
+}
+
+.pagination a:hover {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.pagination span {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   ERROR & MESSAGE STATES
+   ============================================ */
+
+.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--error-red);
+    color: var(--error-red);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: 500;
+}
+
+.message {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-left: 4px solid var(--accent-blue);
+    color: var(--primary-blue);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+/* ============================================
+   AUTHENTICATION PAGES (Login, Register, etc.)
+   ============================================ */
+
+/* Auth form container */
+.body form:not(#cheep-form):not(.cheeps form) {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.auth-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Form fields */
+.form-field,
+.mb-3 {
+    margin-bottom: 20px;
+}
+
+.form-field label,
+.mb-3 label,
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-field input,
+.form-control,
+input[type="email"],
+input[type="text"],
+input[type="tel"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+    background: var(--white);
+}
+
+.form-field input:focus,
+.form-control:focus,
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(44, 95, 141, 0.1);
+}
+
+.form-control[readonly] {
+    background: var(--light-gray);
+    cursor: not-allowed;
+}
+
+/* Form hints */
+.form-hint {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.text-info {
+    background: var(--light-gray);
+    padding: 16px 20px;
+    border-radius: 8px;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    border-left: 4px solid var(--accent-blue);
+}
+
+.text-info strong {
+    color: var(--primary-blue);
+}
+
+/* Checkboxes */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary-blue);
+}
+
+.form-check-label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+/* Validation errors */
+.text-danger,
+.form-field span[class*="validation"],
+span[asp-validation-for] {
+    display: block;
+    color: var(--error-red);
+    font-size: 0.85rem;
+    margin-top: 6px;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--error-red);
+    color: var(--error-red);
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-weight: 500;
+}
+
+/* Auth page buttons */
+.body button[type="submit"]:not(#cheep-submit):not(.cheeps button):not(.like-btn),
+.auth-form button[type="submit"],
+.btn,
+button,
+input[type="submit"] {
+    padding: 12px 32px;
+    background: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    font-family: inherit;
+}
+
+.body button[type="submit"]:not(#cheep-submit):not(.cheeps button):not(.like-btn):hover,
+.auth-form button[type="submit"]:hover,
+.btn:hover,
+button:hover,
+input[type="submit"]:hover {
+    background: var(--primary-blue-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.body button[type="submit"]:not(#cheep-submit):not(.cheeps button):not(.like-btn):active,
+.auth-form button[type="submit"]:active,
+.btn:active,
+button:active,
+input[type="submit"]:active {
+    transform: translateY(0);
+}
+
+/* Button variants */
+.btn-primary {
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    background: var(--primary-blue-hover);
+}
+
+.btn-secondary {
+    background: var(--medium-gray);
+    color: var(--text-dark);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+    color: var(--text-dark);
+}
+
+.btn-danger {
+    background: var(--error-red);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+/* GitHub login button */
+.btn-secondary img {
+    height: 1rem;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* Horizontal rule in auth pages */
+.body hr {
+    border: none;
+    border-top: 2px solid var(--border-color);
+    margin: 32px 0;
+}
+
+/* Auth page headings */
+.body h2 {
+    text-align: center;
+}
+
+.body h4 {
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 24px;
+}
+
+/* Logout confirmation */
+.body form p {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+}
+
+/* Button groups (for logout page) */
+.body form .btn + .btn {
+    margin-left: 12px;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .page {
+        padding: 0 16px 40px;
+    }
+
+    .page h1 {
+        font-size: 2rem;
+        margin: 24px 0 20px;
+    }
+
+    .navigation {
+        padding: 12px 16px;
+    }
+
+    .navigation-links {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .navigation-links a,
+    .navigation-links form button {
+        padding: 12px 16px;
+        text-align: center;
+    }
+
+    .cheepbox {
+        padding: 20px 16px;
+    }
+
+    .cheepbox form {
+        flex-direction: column;
+    }
+
+    .cheepbox .cheep-btn {
+        width: 100%;
+    }
+
+    .body {
+        padding: 24px 16px;
+    }
+
+    .body h2 {
+        font-size: 1.5rem;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .pagination a {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .pagination span {
+        width: 100%;
+        text-align: center;
+        order: -1;
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page h1 {
+        font-size: 1.75rem;
+    }
+
+    .page h1 img {
+        width: 36px;
+        height: 36px;
+    }
+
+    .body {
+        padding: 20px 12px;
+    }
+
+    .cheeps li {
+        padding: 16px;
+    }
+}
+
+/* ============================================
+   SMOOTH SCROLLING & INTERSECTION OBSERVER
+   ============================================ */
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* JavaScript will add fade-in class when cheeps are visible */
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .cheeps li {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   LINK STYLES
+   ============================================ */
+
+a {
+    color: var(--primary-blue);
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--accent-blue);
 }
