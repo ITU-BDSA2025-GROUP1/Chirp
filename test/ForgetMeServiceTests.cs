@@ -47,7 +47,7 @@ public class ForgetMeServiceTests
         var updated = await userManager.FindByIdAsync(author.Id.ToString());
         updated.Should().NotBeNull();
         updated!.Name.Should().Be("Deleted User");
-        updated.Email.Should().BeNull();
+        updated.Email.Should().StartWith("deleted-user-");
         updated.UserName.Should().StartWith("deleted-user-");
         updated.Followers.Should().BeEmpty();
         updated.Following.Should().BeEmpty();
