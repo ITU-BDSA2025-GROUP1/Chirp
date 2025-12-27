@@ -951,7 +951,6 @@ input[type="submit"] {
     padding: 12px 32px;
     background: var(--primary-blue);
     color: var(--white);
-    border: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 1rem;
@@ -961,6 +960,8 @@ input[type="submit"] {
     text-decoration: none;
     text-align: center;
     font-family: inherit;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 .body button[type="submit"]:not(#cheep-submit):not(.cheeps button):not(.like-btn):hover,
@@ -1005,10 +1006,12 @@ input[type="submit"]:active {
 .btn-danger {
     background: var(--error-red);
     color: var(--white);
+    border: 2px solid #2c5f8d;
 }
 
 .btn-danger:hover {
-    background: #b91c1c;
+    background: #2c5f8d;
+    border-color: #2c5f8d;
 }
 
 /* GitHub login button */
@@ -1047,8 +1050,16 @@ input[type="submit"]:active {
 }
 
 /* Button groups (for logout page) */
-.body form .btn + .btn {
-    margin-left: 12px;
+.body .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    align-items: center;
+    margin-top: 16px;
+}
+.body .button-group .btn {
+    min-width: 180px;
+    flex: 0 1 180px;
 }
 
 /* ============================================
