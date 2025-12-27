@@ -3,6 +3,9 @@ using Chirp.Core.Entities;
 using Xunit;
 using Chirp.Web.Pages;
 using Chirp.Core.Interfaces;
+using Chirp.Web.Services;
+using System.Security.Claims;
+using System.Threading;
 using Microsoft.AspNetCore.Http.Features;
 using Chirp.Core.DTOs;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -68,7 +71,7 @@ public class UnitTests
     {
         var service = new FakeCheepService();
         var authorService = new FakeAuthorService();
-        var model = new UserTimelineModel(service, authorService);
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
 
         model.OnGet("TestUser", 2);
 
@@ -83,7 +86,7 @@ public class UnitTests
     {
         var service = new FakeCheepService();
         var authorService = new FakeAuthorService();
-        var model = new UserTimelineModel(service, authorService);
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
 
         model.OnGet("TestUser", 1);
 
@@ -95,7 +98,7 @@ public class UnitTests
     {
         var service = new FakeCheepService();
         var authorService = new FakeAuthorService();
-        var model = new UserTimelineModel(service, authorService);
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
 
         model.OnGet("ProfileUser", 1);
 
@@ -167,4 +170,14 @@ public class FakeAuthorService : IAuthorService
     }
 
     public bool IsFollowing(string followerName, string followeeName) => false;
+}
+
+public class FakeForgetMeService : IForgetMeService
+{
+    public ForgetMeResult Result { get; set; } = ForgetMeResult.Successful();
+
+    public Task<ForgetMeResult> ForgetCurrentUserAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(Result);
+    }
 }

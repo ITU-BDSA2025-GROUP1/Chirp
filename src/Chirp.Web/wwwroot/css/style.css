@@ -330,6 +330,21 @@ body {
     font-size: 0.9rem;
 }
 
+.alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    margin-bottom: 20px;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.alert-success {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #047857;
+}
+
 /* ============================================
    CHEEPS LIST
    ============================================ */
@@ -645,6 +660,89 @@ body {
     color: var(--text-muted);
     font-style: italic;
     font-size: 0.9rem;
+}
+
+.forget-me-btn {
+    margin-top: 16px;
+    padding: 10px 24px;
+    background: var(--error-red);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.forget-me-btn:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.forget-me-dialog {
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    width: min(420px, 90vw);
+    box-shadow: var(--shadow-lg);
+}
+
+.forget-me-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.forget-me-form {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.forget-me-form h4 {
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.forget-me-form p {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.forget-me-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-secondary,
+.btn-danger {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition-fast);
+}
+
+.btn-secondary {
+    background: var(--medium-gray);
+    color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+    background: var(--border-color);
+}
+
+.btn-danger {
+    background: var(--error-red);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
 }
 
 /* ============================================
