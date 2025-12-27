@@ -78,6 +78,7 @@ builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<ICheepRepository, CheepRepository>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, Chirp.Web.Services.NoOpEmailSender>();
+builder.Services.AddScoped<IForgetMeService, ForgetMeService>();
 
 // REQUIRED for Session
 builder.Services.AddDistributedMemoryCache();

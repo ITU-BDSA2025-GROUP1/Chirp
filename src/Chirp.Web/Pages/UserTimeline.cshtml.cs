@@ -1,9 +1,15 @@
 using System;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Threading;
+using System.Threading.Tasks;
 using Chirp.Core.DTOs;
 using Chirp.Core.Interfaces;
+using Chirp.Web.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Chirp.Web.Pages;
 
@@ -12,6 +18,7 @@ public class UserTimelineModel : PageModel
 {
     private readonly ICheepService _cheepService;
     private readonly IAuthorService _authorService;
+    private readonly IForgetMeService _forgetMeService;
 
     public List<CheepDTO> Cheeps { get; private set; } = new();
     public int CurrentPage { get; private set; } = 1;
@@ -21,6 +28,9 @@ public class UserTimelineModel : PageModel
     public int? CurrentAuthorId { get; private set; }
     public bool? IsFollowingProfile { get; private set; }
 
+    [TempData]
+    public string? ForgetMeError { get; set; }
+
     public bool ViewingOwnProfile =>
         Profile != null &&
         CurrentAuthorName != null &&
@@ -29,10 +39,11 @@ public class UserTimelineModel : PageModel
     public IReadOnlyList<string> FollowingNames =>
         Profile?.FollowingNames ?? Array.Empty<string>();
 
-    public UserTimelineModel(ICheepService cheepService, IAuthorService authorService)
+    public UserTimelineModel(ICheepService cheepService, IAuthorService authorService, IForgetMeService forgetMeService)
     {
         _cheepService = cheepService;
         _authorService = authorService;
+        _forgetMeService = forgetMeService;
     }
 
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
@@ -112,6 +123,28 @@ public class UserTimelineModel : PageModel
 
         _authorService.Unfollow(viewer.Name, profileName);
         return RedirectToPage("/UserTimeline", new { author = profileName, page });
+    }
+
+    public async Task<IActionResult> OnPostForgetMeAsync(int page, CancellationToken cancellationToken)
+    {
+        CurrentPage = page < 1 ? 1 : page;
+        var viewer = ResolveCurrentAuthor();
+        if (viewer == null)
+        {
+            return RedirectToPage("/Account/Login");
+        }
+
+        var result = await _forgetMeService.ForgetCurrentUserAsync(User, cancellationToken);
+        if (!result.Success)
+        {
+            ForgetMeError = result.ErrorMessage ?? "We could not delete your profile.";
+            return RedirectToPage("/UserTimeline", new { author = viewer.Name, page = CurrentPage });
+        }
+
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        return RedirectToPage("/Public", new { forget = "1" });
     }
 
     private AuthorDTO? ResolveCurrentAuthor()

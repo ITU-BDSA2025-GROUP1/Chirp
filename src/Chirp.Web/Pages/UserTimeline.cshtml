@@ -20,9 +20,26 @@ else
                 <span><strong>@Model.Profile.FollowingCount</strong> Following</span>
             </div>
 
+            @if (!string.IsNullOrWhiteSpace(Model.ForgetMeError))
+            {
+                <div class="error">@Model.ForgetMeError</div>
+            }
+
             @if (Model.ViewingOwnProfile)
             {
                 <div class="follow-hint">This is your profile overview.</div>
+                <button type="button" class="forget-me-btn" id="forget-me-trigger">Forget me!</button>
+                <dialog id="forget-me-dialog" class="forget-me-dialog" aria-labelledby="forget-me-title">
+                    <form method="post" asp-page-handler="ForgetMe" class="forget-me-form">
+                        <h4 id="forget-me-title">Are you sure you want to delete your profile permanently?</h4>
+                        <p>Your name, email, and relationships will be removed, and you will be signed out immediately.</p>
+                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                        <div class="forget-me-actions">
+                            <button type="button" class="btn-secondary" data-close-dialog>Cancel</button>
+                            <button type="submit" class="btn-danger">Confirm</button>
+                        </div>
+                    </form>
+                </dialog>
             }
             else if (Model.IsFollowingProfile.HasValue)
             {
@@ -95,4 +112,45 @@ else
             }
         </section>
     </div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            const trigger = document.getElementById('forget-me-trigger');
+            const dialog = document.getElementById('forget-me-dialog');
+            if (!trigger || !dialog) {
+                return;
+            }
+
+            const cancelButton = dialog.querySelector('[data-close-dialog]');
+
+            trigger.addEventListener('click', function () {
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                } else {
+                    dialog.setAttribute('open', 'open');
+                }
+            });
+
+            function closeDialog() {
+                if (typeof dialog.close === 'function') {
+                    dialog.close();
+                } else {
+                    dialog.removeAttribute('open');
+                }
+            }
+
+            cancelButton?.addEventListener('click', function (event) {
+                event.preventDefault();
+                closeDialog();
+            });
+
+            dialog.addEventListener('click', function (event) {
+                if (event.target === dialog) {
+                    closeDialog();
+                }
+            });
+        })();
+    </script>
 }

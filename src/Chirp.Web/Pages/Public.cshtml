@@ -9,11 +9,16 @@
 @{
     var idString = User.FindFirstValue(ClaimTypes.NameIdentifier);
     int.TryParse(idString, out var userId);
+    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
 }
 
 <div>
     <h2> Public Timeline </h2>
-    @if (User?.Identity?.IsAuthenticated == true)
+    @if (!string.IsNullOrWhiteSpace(Model.ForgetMeBanner))
+    {
+        <div class="alert alert-success">@Model.ForgetMeBanner</div>
+    }
+    @if (isAuthenticated)
     {
         <form method="post" id="cheep-form" data-testid="cheep-form">
             <div>
@@ -61,9 +66,9 @@
                             <a href="/@cheep.Author">@cheep.Author</a>
                         </strong>
                         
-                        @if (User.Identity?.IsAuthenticated == true && cheep.AuthorId != userId)
+                        @if (isAuthenticated && cheep.AuthorId != userId)
                         {
-                            @if (Model.IsFollowing(Model.CurrentAuthorName, cheep.Author))
+                            @if (Model.IsFollowing(Model.CurrentAuthorName ?? string.Empty, cheep.Author ?? string.Empty))
                             {
                                 <form method="post" asp-page-handler="Unfollow" 
                                     
@@ -84,7 +89,7 @@
                         }
                     </p>
  <p>
-    @if (User.Identity?.IsAuthenticated == true)
+    @if (isAuthenticated)
     {
         <form method="post" asp-page-handler="Like">
             <input type="hidden" name="cheepId" value="@cheep.CheepId" />
