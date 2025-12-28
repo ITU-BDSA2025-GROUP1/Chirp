@@ -1,4 +1,3 @@
-// Program.cs - force SQLite and skip migrations/seeding in "Testing" environment
 using Chirp.Infrastructure.Data;
 using Chirp.Core.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Always use SQLite: compute a writable DB path for Azure and for local dev ---
 string dataDirectory;
 var home = Environment.GetEnvironmentVariable("HOME"); // set by App Service
 if (!string.IsNullOrEmpty(home))
@@ -36,7 +34,7 @@ var sqliteConn = $"Data Source={dbPath}";
 builder.Services.AddDbContext<ChirpDbContext>(options =>
     options.UseSqlite(sqliteConn, b => b.MigrationsAssembly("Chirp.Infrastructure")));
 
-// Identity (keeps your integer keys)
+// Identity (keeps integer keys)
 builder.Services.AddIdentity<Author, IdentityRole<int>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -132,7 +130,7 @@ app.Use(async (context, next) =>
 
 app.UseSession();
 
-// --- Ensure DB and migrations exist on boot, but SKIP when running tests (Testing env) ---
+// Ensure DB and migrations exist on boot, but SKIP when running tests (Testing env)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -143,18 +141,18 @@ using (var scope = app.Services.CreateScope())
 
         if (!app.Environment.IsEnvironment("Testing"))
         {
-            // Production / Development startup: apply migrations and seed if needed
+            // Production/Development startup
             logger.LogInformation("Applying migrations / ensuring database exists at {DbPath}", dbPath);
             db.Database.Migrate();
             logger.LogInformation("Migrations applied successfully.");
 
             logger.LogInformation("Seeding database (if required)...");
-            DbInitializer.SeedDatabase(db); // calls Migrate() internally, but we already migrated - safe
+            DbInitializer.SeedDatabase(db); // calls Migrate() internally
             logger.LogInformation("Database seeding complete.");
         }
         else
         {
-            // Tests will configure their own DbContext and seeding - avoid conflicts
+            // Tests will configure their own DbContext and seeding to avoid conflicts
             logger.LogInformation("Testing environment detected; skipping Program.cs migrations/seeding.");
         }
     }

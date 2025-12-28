@@ -14,7 +14,7 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder); // required so Identity config (keys etc.) is applied
+        base.OnModelCreating(modelBuilder); // required so Identity config (fx. keys) is applied
 
         modelBuilder.Entity<Author>(b =>
         {
