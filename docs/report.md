@@ -25,7 +25,7 @@ Below is a domain model, documenting the essenential concepts of _Chirp_, to cre
 ![Domain model of the _Chirp!_ application](./images/Domain_model.png)
 
 ## Architecture — In the small
-![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Architecture.png)
+![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Arch.png)
 ## Architecture of deployed application
 ![Deployed application diagram.](./images/arch_deployed_app_v2.jpg)
 
