@@ -4,30 +4,29 @@
 
 <h2>Login</h2>
 
-<form method="post">
-    <!-- existing local login fields -->
+<form method="post" class="auth-form">
     <div class="mb-3">
-        <label asp-for="Input.Email"></label>
-        <input asp-for="Input.Email" class="form-control" />
+        <label asp-for="Input.Email">Email</label>
+        <input asp-for="Input.Email" class="form-control" type="email" />
         <span asp-validation-for="Input.Email" class="text-danger"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Input.Password"></label>
-        <input asp-for="Input.Password" class="form-control" />
+        <label asp-for="Input.Password">Password</label>
+        <input asp-for="Input.Password" class="form-control" type="password" />
         <span asp-validation-for="Input.Password" class="text-danger"></span>
     </div>
     <div class="form-check mb-3">
-        <input asp-for="Input.RememberMe" class="form-check-input" />
-        <label asp-for="Input.RememberMe" class="form-check-label"></label>
+        <input asp-for="Input.RememberMe" class="form-check-input" type="checkbox" />
+        <label asp-for="Input.RememberMe" class="form-check-label">Remember me</label>
     </div>
     <button type="submit" class="btn btn-primary">Log in</button>
 </form>
 
 <hr />
 
-<form method="post" asp-page-handler="GitHub">
+<form method="post" asp-page-handler="GitHub" style="text-align: center;">
     <button type="submit" class="btn btn-secondary">
-        <img src="/images/github-mark.svg" alt="" style="height:1rem;vertical-align:middle;" />
+        <img src="/images/github-mark.svg" alt="GitHub" />
         Login with GitHub
     </button>
 </form>

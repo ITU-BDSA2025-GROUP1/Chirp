@@ -18,4 +18,6 @@ public class Author : IdentityUser<int>
 
     //Authors that follow this user
     public List<Author> Followers { get; set; } = new();
+
+    public List<Cheep> LikedCheeps { get; set; } = new();
 }

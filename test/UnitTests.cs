@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using Chirp.Core.Entities;
 using Xunit;
 using Chirp.Web.Pages;
 using Chirp.Core.Interfaces;
+using Chirp.Web.Services;
+using System.Security.Claims;
+using System.Threading;
 using Microsoft.AspNetCore.Http.Features;
 using Chirp.Core.DTOs;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -66,8 +70,8 @@ public class UnitTests
     public void UserTimeLineModel_OnGet_ShouldGetCurrentPage()
     {
         var service = new FakeCheepService();
-        var authorRepository = new FakeAuthorRepository();
-        var model = new UserTimelineModel(service, authorRepository);
+        var authorService = new FakeAuthorService();
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
 
         model.OnGet("TestUser", 2);
 
@@ -81,24 +85,38 @@ public class UnitTests
     public void PublicTimeLineModel_OnGet_ShouldDefaultToPage1()
     {
         var service = new FakeCheepService();
-        var authorRepository = new FakeAuthorRepository();
-        var model = new UserTimelineModel(service, authorRepository);
+        var authorService = new FakeAuthorService();
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
 
         model.OnGet("TestUser", 1);
 
         Assert.Equal(1, model.CurrentPage);
     }
+
+    [Fact]
+    public void UserTimeLineModel_ShouldPopulateProfile()
+    {
+        var service = new FakeCheepService();
+        var authorService = new FakeAuthorService();
+        var model = new UserTimelineModel(service, authorService, new FakeForgetMeService());
+
+        model.OnGet("ProfileUser", 1);
+
+        Assert.NotNull(model.Profile);
+        Assert.Equal("ProfileUser", model.Profile!.Name);
+        Assert.False(model.ViewingOwnProfile);
+    }
 }
 
-// Fake implementation of ICheepService for testing purposes
+// Fake implementation of ICheepService for testing purposes 
 public class FakeCheepService : ICheepService
 {
-    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>();
     }
 
-    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>
         {
@@ -106,7 +124,7 @@ public class FakeCheepService : ICheepService
         };
     }
 
-    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         return new List<CheepDTO>
         {
@@ -120,45 +138,46 @@ public class FakeCheepService : ICheepService
     }
 }
 
-public class FakeAuthorRepository : IAuthorRepository
+public class FakeAuthorService : IAuthorService
 {
-    public Author? GetAuthorByName(string name)
-    {
-        return new Author
-        {
-            AuthorId = 1,
-            Name = "TestUser",
-            Email = "testuser@example.com"
-        };
-    }
+    public AuthorDTO? GetAuthorByName(string name) => new AuthorDTO(1, "TestUser", "testuser@example.com");
 
-    public Author? GetAuthorByEmail(string email)
+    public AuthorDTO? GetAuthorByEmail(string email) => new AuthorDTO(1, "TestUser", email);
+
+    public AuthorProfileDTO? GetProfileByName(string name) => new AuthorProfileDTO
     {
-        return new Author
-        {
-            AuthorId = 1,
-            Name = "TestUser",
-            Email = "testuser@example.com"
-        };
-    }
+        Id = 2,
+        Name = name,
+        Email = $"{name}@example.com",
+        FollowerCount = 3,
+        FollowingCount = 2,
+        FollowingNames = new List<string> { "Alice", "Bob" }
+    };
 
     public void AddAuthor(Author author)
     {
-        // Do nothing
+        // No-op for tests
     }
 
     public void Follow(string followerName, string followeeName)
     {
-        // Do nothing
+        // No-op for tests
     }
 
     public void Unfollow(string followerName, string followeeName)
     {
-        // Do nothing
+        // No-op for tests
     }
 
-    public bool IsFollowing(string followerName, string followeeName)
+    public bool IsFollowing(string followerName, string followeeName) => false;
+}
+
+public class FakeForgetMeService : IForgetMeService
+{
+    public ForgetMeResult Result { get; set; } = ForgetMeResult.Successful();
+
+    public Task<ForgetMeResult> ForgetCurrentUserAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
     {
-        return false;
+        return Task.FromResult(Result);
     }
 }

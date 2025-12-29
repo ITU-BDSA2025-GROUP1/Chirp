@@ -12,4 +12,8 @@ public interface ICheepRepository
     Boolean CreateCheep(Cheep cheep);
 
     Boolean CreateCheep(string authorName, string text, DateTime? timestamp = null);
+
+    Boolean LikeCheep (int cheepId, int authorId);
+
+    Boolean IsLiked (int cheepId, int authorId);
 }

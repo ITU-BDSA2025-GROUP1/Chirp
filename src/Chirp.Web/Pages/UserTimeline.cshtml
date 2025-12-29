@@ -1,68 +1,156 @@
 ﻿@page "/{author}"
-@using Chirp.Core.DTOs
-@using System.Security.Claims
 @model Chirp.Web.Pages.UserTimelineModel
 @{
     ViewData["Title"] = "Chirp!";
     Layout = "Shared/_Layout";
-    var routeName = HttpContext.GetRouteValue("author");
 }
 
-@{
-    var idString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-    int.TryParse(idString, out var userId);
+@if (Model.Profile is null)
+{
+    <div class="error">We could not find that user.</div>
+}
+else
+{
+    <div class="user-info-page">
+        <section class="user-info-header">
+            <h2>@Model.Profile.Name</h2>
+            <p class="user-email">@(!string.IsNullOrWhiteSpace(Model.Profile.Email) ? Model.Profile.Email : "Email not provided")</p>
+            <div class="user-stats">
+                <span><strong>@Model.Profile.FollowerCount</strong> Followers</span>
+                <span><strong>@Model.Profile.FollowingCount</strong> Following</span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ForgetMeError))
+            {
+                <div class="error">@Model.ForgetMeError</div>
+            }
+
+            @if (Model.ViewingOwnProfile)
+            {
+                <div class="follow-hint">This is your profile overview.</div>
+                <button type="button" class="forget-me-btn" id="forget-me-trigger">Forget me!</button>
+                <dialog id="forget-me-dialog" class="forget-me-dialog" aria-labelledby="forget-me-title">
+                    <form method="post" asp-page-handler="ForgetMe" class="forget-me-form">
+                        <h4 id="forget-me-title">Are you sure you want to delete your profile permanently?</h4>
+                        <p>Your name, email, and relationships will be removed, and you will be signed out immediately.</p>
+                        <input type="hidden" name="page" value="@Model.CurrentPage" />
+                        <div class="forget-me-actions">
+                            <button type="button" class="btn-secondary" data-close-dialog>Cancel</button>
+                            <button type="submit" class="btn-danger">Confirm</button>
+                        </div>
+                    </form>
+                </dialog>
+            }
+            else if (Model.IsFollowingProfile.HasValue)
+            {
+                var handler = Model.IsFollowingProfile.Value ? "Unfollow" : "Follow";
+                var label = Model.IsFollowingProfile.Value ? "Unfollow" : "Follow";
+                <form method="post" asp-page-handler="@handler" class="follow-toggle-form">
+                    <input type="hidden" name="profileName" value="@Model.Profile.Name" />
+                    <input type="hidden" name="page" value="@Model.CurrentPage" />
+                    <button type="submit" class="follow-btn">@label @Model.Profile.Name</button>
+                </form>
+            }
+        </section>
+
+        <section class="user-following">
+            <h3>Following</h3>
+            @if (Model.FollowingNames.Count > 0)
+            {
+                <ul class="following-list">
+                    @foreach (var followee in Model.FollowingNames)
+                    {
+                        <li><a href="/@followee">@followee</a></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="muted">Not following anyone yet.</p>
+            }
+        </section>
+
+        <section class="user-cheeps">
+            <h3>
+                @(Model.ViewingOwnProfile
+                    ? "Latest from you & the people you follow"
+                    : $"Latest from {Model.Profile.Name}")
+            </h3>
+
+            @if (Model.Cheeps.Any())
+            {
+                <ul id="messagelist" class="cheeps">
+                    @foreach (var cheep in Model.Cheeps)
+                    {
+                        <li class="fade-in">
+                            <div class="cheep-header">
+                                <strong><a href="/@cheep.Author">@cheep.Author</a></strong>
+                                <small class="cheep-timestamp">@cheep.Timestamp</small>
+                            </div>
+                            <p>@cheep.Message</p>
+                            <div class="cheep-meta">
+                                <span class="cheep-likes">
+                                    @(cheep.LikedByCurrentUser ? "❤️" : "🤍") @cheep.LikeCount
+                                </span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <div class="pagination">
+                    @if (Model.CurrentPage > 1)
+                    {
+                        <a href="/@Model.Profile.Name?page=@(Model.CurrentPage - 1)">« Previous</a>
+                    }
+                    <span>Page @Model.CurrentPage</span>
+                    <a href="/@Model.Profile.Name?page=@(Model.CurrentPage + 1)">Next »</a>
+                </div>
+            }
+            else
+            {
+                <em>There are no cheeps so far.</em>
+            }
+        </section>
+    </div>
 }
 
-<div>
-    <h2> @routeName's Timeline </h2>
+@section Scripts {
+    <script>
+        (function () {
+            const trigger = document.getElementById('forget-me-trigger');
+            const dialog = document.getElementById('forget-me-dialog');
+            if (!trigger || !dialog) {
+                return;
+            }
 
-    @if (Model.Cheeps.Any())
-    {
-        <ul id="messagelist" class="cheeps">
-            @foreach (var cheep in Model.Cheeps)
-            {
-                <li>
-                    <p>
-                        <strong>
-                            <a href="/@cheep.Author">@cheep.Author</a>
-                        </strong>
-                        
-                        @if (User.Identity?.IsAuthenticated == true && cheep.AuthorId != userId)
-                        {
-                            @if (Model.IsFollowing(Model.CurrentAuthorName, cheep.Author))
-                            {
-                                <form method="post" asp-page-handler="Unfollow" style="display:inline;">
-                                    <input type="hidden" name="authorName" value="@cheep.Author" />
-                                    <button type="submit">Unfollow</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <form method="post" asp-page-handler="Follow" style="display:inline;">
-                                    <input type="hidden" name="authorName" value="@cheep.Author" />
-                                    <button type="submit">Follow</button>
-                                </form>
-                            }
-                        }
-                    </p>
-                    <p>
-                        @cheep.Message
-                        <small>&mdash; @cheep.Timestamp</small>
-                    </p>
-                </li>
+            const cancelButton = dialog.querySelector('[data-close-dialog]');
+
+            trigger.addEventListener('click', function () {
+                if (typeof dialog.showModal === 'function') {
+                    dialog.showModal();
+                } else {
+                    dialog.setAttribute('open', 'open');
+                }
+            });
+
+            function closeDialog() {
+                if (typeof dialog.close === 'function') {
+                    dialog.close();
+                } else {
+                    dialog.removeAttribute('open');
+                }
             }
-        </ul>
-        <div class="pagination">
-            @if (Model.CurrentPage > 1)
-            {
-                <a href="/@routeName?page=@(Model.CurrentPage - 1)">« Previous</a>
-            }
-            <span>Page @Model.CurrentPage</span>
-            <a href="/@routeName?page=@(Model.CurrentPage + 1)">Next »</a>
-        </div>
-    }
-    else
-    {
-        <em>There are no cheeps so far.</em>
-    }
-</div>
+
+            cancelButton?.addEventListener('click', function (event) {
+                event.preventDefault();
+                closeDialog();
+            });
+
+            dialog.addEventListener('click', function (event) {
+                if (event.target === dialog) {
+                    closeDialog();
+                }
+            });
+        })();
+    </script>
+}

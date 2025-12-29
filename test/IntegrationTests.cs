@@ -35,13 +35,19 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task GetUserTimeline_ReturnsSuccess()
+    public async Task GetUserTimeline_RequiresAuthentication()
     {
-        // Act
-        var response = await _client.GetAsync("/Helge");
+        var authClient = _factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            AllowAutoRedirect = false
+        });
+
+        var response = await authClient.GetAsync("/Helge");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.Redirect);
+        response.Headers.Location.Should().NotBeNull();
+        response.Headers.Location!.OriginalString.Should().Contain("/Account/Login");
     }
 
     [Fact]
