@@ -1,137 +1,165 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Chirp.Core.DTOs;
 using Chirp.Core.Interfaces;
+using Chirp.Web.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Chirp.Web.Pages;
 
+[Authorize]
 public class UserTimelineModel : PageModel
 {
-    private readonly ICheepService _service;
-    private readonly IAuthorRepository _authorRepository;
+    private readonly ICheepService _cheepService;
+    private readonly IAuthorService _authorService;
+    private readonly IForgetMeService _forgetMeService;
 
+    public List<CheepDTO> Cheeps { get; private set; } = new();
+    public int CurrentPage { get; private set; } = 1;
+    public string Author { get; private set; } = string.Empty;
+    public AuthorProfileDTO? Profile { get; private set; }
+    public string? CurrentAuthorName { get; private set; }
+    public int? CurrentAuthorId { get; private set; }
+    public bool? IsFollowingProfile { get; private set; }
 
-    // initialize to avoid CS8618
-    public List<CheepDTO> Cheeps { get; set; } = new List<CheepDTO>();
-    public int CurrentPage { get; set; }
-    public string Author { get; set; } = string.Empty;
+    [TempData]
+    public string? ForgetMeError { get; set; }
 
-    public string? CurrentAuthorName { get; set; }
+    public bool ViewingOwnProfile =>
+        Profile != null &&
+        CurrentAuthorName != null &&
+        string.Equals(Profile.Name, CurrentAuthorName, StringComparison.OrdinalIgnoreCase);
 
-    public UserTimelineModel(ICheepService service, IAuthorRepository authorRepository)
+    public IReadOnlyList<string> FollowingNames =>
+        Profile?.FollowingNames ?? Array.Empty<string>();
+
+    public UserTimelineModel(ICheepService cheepService, IAuthorService authorService, IForgetMeService forgetMeService)
     {
-        _service = service;
-        _authorRepository = authorRepository;
+        _cheepService = cheepService;
+        _authorService = authorService;
+        _forgetMeService = forgetMeService;
     }
 
     public ActionResult OnGet(string author, [FromQuery] int page = 1)
     {
-        CurrentPage = page;
-        var email = User?.Identity?.Name;
-        if (!string.IsNullOrWhiteSpace(email))
+        var viewer = ResolveCurrentAuthor();
+        if (page < 1)
         {
-            var currentAuthor = _authorRepository.GetAuthorByEmail(email);
-            CurrentAuthorName = currentAuthor?.Name;
+            page = 1;
         }
 
-        if (page < 1) page = 1;
-
-        Author = author ?? string.Empty;
         CurrentPage = page;
-         if (!string.IsNullOrWhiteSpace(CurrentAuthorName) &&
-        string.Equals(CurrentAuthorName, author, StringComparison.OrdinalIgnoreCase))
+        IsFollowingProfile = null;
+        Profile = _authorService.GetProfileByName(author);
+        if (Profile == null)
         {
-            Cheeps = _service.GetCheepsFromAuthorAndFollowing(author, page);
+            return NotFound();
+        }
+
+        Author = Profile.Name;
+
+        if (ViewingOwnProfile)
+        {
+            Cheeps = _cheepService.GetCheepsFromAuthorAndFollowing(Profile.Name, page, viewerId: viewer?.Id);
         }
         else
         {
-            Cheeps = _service.GetCheepsFromAuthor(author, page);
+            Cheeps = _cheepService.GetCheepsFromAuthor(Profile.Name, page, viewerId: viewer?.Id);
+            if (viewer != null)
+            {
+                IsFollowingProfile = _authorService.IsFollowing(viewer.Name, Profile.Name);
+            }
         }
+
         return Page();
     }
 
-    public ActionResult OnPost(string author, [FromForm] string text)
+    public ActionResult OnPost(string author, [FromForm] string text, [FromQuery] int page = 1)
     {
+        var viewer = ResolveCurrentAuthor();
+        if (viewer == null)
+        {
+            return RedirectToPage("/Account/Login");
+        }
+
         if (string.IsNullOrWhiteSpace(author))
         {
             return RedirectToPage("/Public");
         }
 
-        var currentUser = User?.Identity?.Name;
-        var isAuthenticated = User?.Identity?.IsAuthenticated == true;
-
-        if (isAuthenticated && !string.IsNullOrWhiteSpace(currentUser) && !string.IsNullOrWhiteSpace(text))
+        if (!string.IsNullOrWhiteSpace(text))
         {
-            _service.CreateCheep(currentUser!, text);
+            _cheepService.CreateCheep(User.Identity!.Name!, text);
         }
 
-        return RedirectToPage("/UserTimeline", new { author });
+        return RedirectToPage("/UserTimeline", new { author, page });
     }
 
-    public bool IsFollowing(string followerName, string followeeName)
+    public IActionResult OnPostFollow(string profileName, int page)
     {
-        try
+        var viewer = ResolveCurrentAuthor();
+        if (viewer == null)
         {
-            return _authorRepository.IsFollowing(followerName, followeeName);
-        }
-        catch (InvalidOperationException)
-        {
-            return false;
-        }
-    }
-        public async Task<IActionResult> OnPostFollowAsync(string authorName)
-    {
-          var email = User?.Identity?.Name;
-        
-        
-        if (string.IsNullOrEmpty(email))
-        {
-            return RedirectToPage("/Login");
+            return RedirectToPage("/Account/Login");
         }
 
-        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
-        if (currentAuthor == null)
-        {
-            return RedirectToPage("/Login");
-        }
-
-        try
-        {
-            _authorRepository.Follow(currentAuthor.Name, authorName);
-        }
-        catch (InvalidOperationException ex)
-        {
-            // Error handling to be done here
-        }
-
-        return RedirectToPage("/UserTimeline", new { author = authorName, page = CurrentPage });
+        _authorService.Follow(viewer.Name, profileName);
+        return RedirectToPage("/UserTimeline", new { author = profileName, page });
     }
 
-    public async Task<IActionResult> OnPostUnfollowAsync(string authorName)
+    public IActionResult OnPostUnfollow(string profileName, int page)
     {
-          var email = User?.Identity?.Name;
-        
-        
-        if (string.IsNullOrEmpty(email))
+        var viewer = ResolveCurrentAuthor();
+        if (viewer == null)
         {
-            return RedirectToPage("/Login");
+            return RedirectToPage("/Account/Login");
         }
 
-        var currentAuthor = _authorRepository.GetAuthorByEmail(email);
-        if (currentAuthor == null)
+        _authorService.Unfollow(viewer.Name, profileName);
+        return RedirectToPage("/UserTimeline", new { author = profileName, page });
+    }
+
+    public async Task<IActionResult> OnPostForgetMeAsync(int page, CancellationToken cancellationToken)
+    {
+        CurrentPage = page < 1 ? 1 : page;
+        var viewer = ResolveCurrentAuthor();
+        if (viewer == null)
         {
-            return RedirectToPage("/Login");
+            return RedirectToPage("/Account/Login");
         }
 
-        try
+        var result = await _forgetMeService.ForgetCurrentUserAsync(User, cancellationToken);
+        if (!result.Success)
         {
-            _authorRepository.Unfollow(currentAuthor.Name, authorName);
-        }
-        catch (InvalidOperationException ex)
-        {
-            // Error handling to be done here
+            ForgetMeError = result.ErrorMessage ?? "We could not delete your profile.";
+            return RedirectToPage("/UserTimeline", new { author = viewer.Name, page = CurrentPage });
         }
 
-        return RedirectToPage("/UserTimeline", new { author = currentAuthor.Name, page = CurrentPage });
+        await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+        return RedirectToPage("/Public", new { forget = "1" });
+    }
+
+    private AuthorDTO? ResolveCurrentAuthor()
+    {
+        var email = User?.Identity?.Name;
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            CurrentAuthorName = null;
+            CurrentAuthorId = null;
+            return null;
+        }
+
+        var viewer = _authorService.GetAuthorByEmail(email);
+        CurrentAuthorName = viewer?.Name;
+        CurrentAuthorId = viewer?.Id;
+        return viewer;
     }
 }

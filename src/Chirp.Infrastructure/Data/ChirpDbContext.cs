@@ -14,7 +14,7 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder); // required so Identity config (keys etc.) is applied
+        base.OnModelCreating(modelBuilder); // required so Identity config (fx. keys) is applied
 
         modelBuilder.Entity<Author>(b =>
         {
@@ -30,6 +30,11 @@ public class ChirpDbContext : IdentityDbContext<Author, IdentityRole<int>, int>
         {
             b.HasKey(c => c.CheepId);
             b.Property(c => c.Text).IsRequired().HasMaxLength(280);
+
+            // Many-to-many relationship for Likes
+            b.HasMany(c => c.Likes)
+             .WithMany(a => a.LikedCheeps)
+             .UsingEntity(j => j.ToTable("CheepLikes"));
 
             // Ensure DateTime is tracked as UTC
             b.Property(c => c.Timestamp)

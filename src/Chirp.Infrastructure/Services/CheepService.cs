@@ -13,43 +13,64 @@ public class CheepService : ICheepService
         _repo = repo;
     }
 
-    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheeps(int page = 1, int pageSize = 32, int? viewerId = null)
     {
         var items = _repo.GetCheeps(page, pageSize) ?? Enumerable.Empty<Chirp.Core.Entities.Cheep>();
-        return items.Select(c => new CheepDTO(
+        return items.Select(c => 
+        {
+            var likes = c.Likes ?? new List<Chirp.Core.Entities.Author>();
+            
+            return new CheepDTO(
                 c.Author?.Name ?? string.Empty,
                 c.Text,
                 FormatTs(c.Timestamp))
                 {
-                    AuthorId = c.AuthorId
-                })
-            .ToList();
+                    AuthorId = c.AuthorId,
+                    CheepId = c.CheepId,
+                    LikeCount = likes.Count,
+                    LikedByCurrentUser = viewerId.HasValue && likes.Any(a => a.Id == viewerId.Value)
+                };
+    }).ToList();
     }
 
-    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthor(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         var items = _repo.GetCheepsFromAuthor(author, page, pageSize) ?? Enumerable.Empty<Chirp.Core.Entities.Cheep>();
-        return items.Select(c => new CheepDTO(
+        return items.Select(c => 
+        {
+            var likes = c.Likes ?? new List<Chirp.Core.Entities.Author>();
+            
+            return new CheepDTO(
                 c.Author?.Name ?? string.Empty,
                 c.Text,
                 FormatTs(c.Timestamp))
                 {
-                    AuthorId = c.AuthorId
-                })
-            .ToList();
+                    AuthorId = c.AuthorId,
+                    CheepId = c.CheepId,
+                    LikeCount = likes.Count,
+                    LikedByCurrentUser = viewerId.HasValue && likes.Any(a => a.Id == viewerId.Value)
+                };
+    }).ToList();
     }
 
-    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32)
+    public List<CheepDTO> GetCheepsFromAuthorAndFollowing(string author, int page = 1, int pageSize = 32, int? viewerId = null)
     {
         var items = _repo.GetCheepsFromAuthorAndFollowing(author, page, pageSize);
-        return items.Select(c => new CheepDTO(
-                c.Author.Name,
+        return items.Select(c => 
+        {
+            var likes = c.Likes ?? new List<Chirp.Core.Entities.Author>();
+            
+            return new CheepDTO(
+                c.Author?.Name ?? string.Empty,
                 c.Text,
                 FormatTs(c.Timestamp))
                 {
-                    AuthorId = c.AuthorId
-                })
-            .ToList();
+                    AuthorId = c.AuthorId,
+                    CheepId = c.CheepId,
+                    LikeCount = likes.Count,
+                    LikedByCurrentUser = viewerId.HasValue && likes.Any(a => a.Id == viewerId.Value)
+                };
+    }).ToList();
     }
 
     public bool CreateCheep(string authorName, string text, DateTime? timestamp = null)

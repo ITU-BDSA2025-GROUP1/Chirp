@@ -47,11 +47,7 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <div class="cheepbox">
-            <h3>What's on your mind @displayName?</h3>
-            <form method="post">
-                <input type="text" name="text" class="cheep-input" />
-                <button type="submit" class="cheep-btn">Share</button>
-            </form>
+            <h3>@displayName</h3>
         </div>
     }
     <div class=body>
