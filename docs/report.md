@@ -36,6 +36,10 @@ The deployment architecture follows the client - server architecture. Where the 
 ## Build, test, release, and deployment
 
 ## Team work
+Mostly we're missing a few tests, and at the end of development we noticed that usernames are not unique, and registering with the same username will cause errors with their timelines.
+![Project Board.](./images/ProjectBoard.jpg)
+Each week the group would meet to discuss the project work tasks, aswell as how the previous ones were implemented. After identifying the described tasks that can be made into issues, they were distributed among members who would fill out the issue template with a user story and acceptance criteria. The members would create a appropriate branch and work on their assigned issue, until meeting again before the next lecture to finish up or inform the others of their progress and when they expect to be finished. When finished they would create a pull request, which would then be reviewed by another member who would either request changes or approve and merge the branch into main.
+![Activity Flow.](./images/TeamWork.png)
 
 ## How to make _Chirp!_ work locally
 
