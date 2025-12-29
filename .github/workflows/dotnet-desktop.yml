@@ -39,6 +39,11 @@ jobs:
     - name: Build
       run: dotnet build Chirp.sln --configuration Release --no-restore
 
+    - name: Install Playwright Browsers
+      run: |
+        dotnet tool install --global Microsoft.Playwright.CLI
+        playwright install --with-deps
+      
     - name: Test
       run: dotnet test test/test.csproj --configuration Release --no-build --verbosity normal
       env:
