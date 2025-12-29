@@ -33,6 +33,9 @@ Here comes a description of our domain model.
 # Process
 
 ## Build, test, release, and deployment
+![Diagram of how GitHub Actions deploys the code to Azure](docs/images/Azure_deployment_workflow.jpg)
+
+The diagram shows how the code is deployed to Azure. It starts when a pull request is merged into the main branch. Then it builds the project to make sure that it works before it publishes the code. If that succeds then it will deploy the code to our Azure web server.
 
 ## Team work
 
