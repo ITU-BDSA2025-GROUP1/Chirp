@@ -98,6 +98,30 @@ The project contains Unit-test, integration-tests, end-to-end-tests, and UI-test
    - Run only Playwright UI/E2E tests:
      `dotnet test --filter FullyQualifiedName~CheepUiAndE2ETests`
 
+### Coverage
+The test suite is covering a wide range of functionality of the _Chirp_ client, ensuring that the application is reliable, meets user expectations, and is free of bugs. 
+
+**Unit Tests**
+UnitTests.cs:
+Testing without start a web app/server to make tests to the base functionality of _Chirp_.
+
+
+**Integration Tests**
+IntegrationTests.cs, WebAppFactory.cs, SharedFactoryCollection.cs:
+Tests the integration of the app, as a running system, without browser UI. 
+
+
+**End-to-End Tests**
+End2EndTest.cs:
+These are simliar to the integration tests, the main difference being that they test the content an user interacts with. 
+
+
+**UI End-to-End Tests**
+CheepUiAndE2ETests.cs, PlaywrightSmokeTests.cs:
+With Microsoft.Playwright it imitates a real browser, as an user would see it and starts a server. This is to prove that the system work from the user's perspective. 
+
+
+
 # Ethics
 
 ## License
