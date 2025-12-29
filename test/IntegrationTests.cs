@@ -12,13 +12,8 @@ using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 using System.Text.Encodings.Web;
-//using Microsoft.AspNetCore.Authentication.Testing;
 
 namespace Chirp.IntegratedTests;
-
-// Note: These integration tests were for the old WebApi project which had REST API endpoints.
-// The new Razor Pages application doesn't expose API endpoints - it serves HTML pages.
-// For web app testing, use End2EndTests.cs which tests the HTML pages.
 
 public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
@@ -67,7 +62,7 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task UserTimeline_FirstPage_ShowsExactly32Cheeps()
+    public void UserTimeline_FirstPage_ShowsExactly32Cheeps()
     {
         // Arrange: seed a test author + 40 cheeps
         int authorId;
@@ -123,8 +118,8 @@ public class IntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock)
-        : base(options, logger, encoder, clock) { }
+    public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+        : base(options, logger, encoder) { }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
