@@ -18,10 +18,10 @@ numbersections: true
 
 Here comes a description of our domain model.
 
-![Illustration of the _Chirp!_ data model as UML class diagram.](docs/images/domain_model.png)
+![Illustration of the _Chirp!_ data model as UML class diagram.](./images/domain_model.png)
 
 ## Architecture — In the small
-![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](docs/images/Onion_Architecture.png)
+![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Architecture.png)
 ## Architecture of deployed application
 ![Deployed application diagram.](./images/arch_deployed_app_v2.jpg)
 
