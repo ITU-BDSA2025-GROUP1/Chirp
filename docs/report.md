@@ -55,6 +55,7 @@ The diagram shows how the code is deployed to Azure. It starts when a pull reque
 The diagram shows how our test and release workflow works. It actually starts by starting three of the same workflow. One for Windows, one for Mac and one for Linux. It all runs in paralel, where it starts by restoreing dependencies to make sure it doen't have anything cached. Then it tries to build the program, if that works it installs playwright, then it starts running all of the tests. If any tests fail it will just terminate and fail the workflow. If not then it publishes and releases the code.
 
 In our repocetory we have rules that makes sure that this workflow runs and that it succeds on all three of the oberating systems. Only if all of these have succeded, then you can merge the pull request after a code review. 
+
 ## Team work
 Mostly we're missing a few tests, and at the end of development we noticed that usernames are not unique, and registering with the same username will cause errors with their timelines.
 ![Project Board.](./images/ProjectBoard.jpg)
