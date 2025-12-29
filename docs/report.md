@@ -23,7 +23,7 @@ _Chirp_ is built on two main entities, which are `Author` and `Cheep`.
 Below is a domain model, documenting the essenential concepts of _Chirp_, to create a conceptual framework that accurately describes the structure and dynamic of the program. 
 
 ## Architecture — In the small
-![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Architecture.png)
+![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Arch.png)
 ## Architecture of deployed application
 ![Deployed application diagram.](./images/arch_deployed_app_v2.jpg)
 
