@@ -22,9 +22,6 @@ _Chirp_ is built on two main entities, which are `Author` and `Cheep`.
 
 Below is a domain model, documenting the essenential concepts of _Chirp_, to create a conceptual framework that accurately describes the structure and dynamic of the program. 
 
-
-![Illustration of the _Chirp!_ data model as UML class diagram.](./images/domain_model.png)
-
 ## Architecture — In the small
 ![Illustration of the _Chirp!_ Onion Architecture as UML class diagram.](./images/Onion_Architecture.png)
 ## Architecture of deployed application
@@ -99,3 +96,6 @@ The project contains Unit-test, integration-tests, end-to-end-tests, and UI-test
 We chose to use an MIT license as the project is an open source project that is public on GitHub and can be used by the GitHub users, if they credit us. Besides that, the MIT license is easy to understand, permissive (minimal restrictions) and widely used and known.
 
 ## LLMs, ChatGPT, CoPilot, and others
+We have used a range of LLMs such as ChatGPT and Claude. We have used LLMs mostly to help debug our code when large errors were hard to understand. It has also been used to make boilerplate code when making a new feature or document. When making GitHub Actions it has also helped by understanding how it works and how to make it work with Azure deployment.
+
+The use of LLMs has overall been quite helpfull in saving time when having to deal with minor problems or bugs, or making some boilerplate code when making new HTML pages as an example. It has also been really helpfull when we have to research a new topic or get a better explaination for something from the lectures. Overall it has spead up our development by saving time in reseaching and debugging.
