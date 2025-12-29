@@ -35,6 +35,9 @@ The deployment architecture follows the client - server architecture. Where the 
 ## User activities
 
 ## Sequence of functionality/calls trough _Chirp!_
+A Client sends a HTTP GET / to the Webserver. The Webserver forwards it to Routing, which maps the request on the Razor Page and calls OnGet(page=1). Razor Page then asks Service for data through GetCheeps(page=1,pageSize=32). The Repository uses EF Core to query cheeps; EF Core then issues an SQL SELECT to SQLite DB and gets rows of cheeps back. EF Core returns a List<Cheep> with authors to the Repository which returns it to Service. Service then returns a List<CheepDTO> with author, text and timestamp to the Razor Page. Razor Page then hands the list to View Render which renders Public.cshtml and _Layout and the Webserver returns the rendered HTML as the HTTP response to the Client. 
+
+![Sequence diagram of the Chirp! request flow.](./images/sequence-diagram.jpg)
 
 # Process
 
@@ -93,5 +96,6 @@ The project contains Unit-test, integration-tests, end-to-end-tests, and UI-test
 # Ethics
 
 ## License
+We chose to use an MIT license as the project is an open source project that is public on GitHub and can be used by the GitHub users, if they credit us. Besides that, the MIT license is easy to understand, permissive (minimal restrictions) and widely used and known.
 
 ## LLMs, ChatGPT, CoPilot, and others
