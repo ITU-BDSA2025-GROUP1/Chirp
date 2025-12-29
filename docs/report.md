@@ -36,6 +36,8 @@ The deployment architecture follows the client - server architecture. Where the 
 
 ## User activities
 
+![User Activities diagram](./images/User_Activities.png)
+
 ## Sequence of functionality/calls trough _Chirp!_
 A Client sends a HTTP GET / to the Webserver. The Webserver forwards it to Routing, which maps the request on the Razor Page and calls OnGet(page=1). Razor Page then asks Service for data through GetCheeps(page=1,pageSize=32). The Repository uses EF Core to query cheeps; EF Core then issues an SQL SELECT to SQLite DB and gets rows of cheeps back. EF Core returns a List<Cheep> with authors to the Repository which returns it to Service. Service then returns a List<CheepDTO> with author, text and timestamp to the Razor Page. Razor Page then hands the list to View Render which renders Public.cshtml and _Layout and the Webserver returns the rendered HTML as the HTTP response to the Client. 
 
