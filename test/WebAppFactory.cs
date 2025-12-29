@@ -52,8 +52,7 @@ public class WebAppFactory : WebApplicationFactory<global::Program>
             // Ensure schema is created safely
             db.Database.Migrate();
 
-            // Seed the DB
-            //"comment"
+            // Seed the DB with test data
             DbInitializer.SeedTestDataBase(db);
         });
     }

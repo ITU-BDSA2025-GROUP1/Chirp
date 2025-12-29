@@ -91,7 +91,7 @@ public class CheepUiAndE2ETests : IAsyncLifetime
     {
         var unique = Guid.NewGuid().ToString("N").Substring(0, 8);
         var email = $"test_{unique}@example.com";
-        var password = "Passw0rd!"; // Must satisfy password policy
+        var password = "Passw0rd!";
 
         await _page.GotoAsync(BaseUrl + "/Account/Register");
         await _page.FillAsync("input[name=\"Input.Name\"]", "TestUser" + unique);
