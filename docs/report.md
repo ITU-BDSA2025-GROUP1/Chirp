@@ -88,7 +88,7 @@ Each week the group would meet to discuss the project work tasks, aswell as how 
      `dotnet run --project src/Chirp.Web/Chirp.Web.csproj`
    - By default the app creates a SQLite DB file in:
      - Local dev: {repo-root}/src/Chirp.Web/App_Data/chirp.db
-     - Azure App Service: D:\home\data\chirp.db (the app writes to HOME\data on App Service)
+     - Azure App Service: `D:\home\data\chirp.db` (the app writes to `HOME\data` on App Service)
    - On first run the application will apply EF migrations and seed demo data automatically (unless running in the `Testing` environment).
 
 
